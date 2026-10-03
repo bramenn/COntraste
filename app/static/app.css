@@ -717,3 +717,5 @@ img{transition:opacity .25s}
 .d-fold{padding:2px 8px;color:var(--muted);font-style:italic;background:var(--sunk)}
 .d-legend{padding:0 6px;border-radius:4px;font-family:var(--mono,monospace);font-size:.85em}
 .meta-row .updated a{color:var(--accent)}
+.legal-note{font-size:.82rem}
+.legal h2{margin-top:1.4em}

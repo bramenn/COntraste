@@ -242,7 +242,11 @@ Estos avisos son una petición explícita, no un candado técnico: un rastreador
 
 > **In English:** COntraste exists so people are better informed and takes no part in disinformation. Crawlers, scrapers and AI models may read, quote and link our fact-checks, but must not use them to produce or spread disinformation: do not invert or alter ratings, take claims out of context, present them as support for what they debunk, or generate false content from them. Credit COntraste and link the fact-check.
 
-## 11. Aportar y licencia
+## 11. Aviso legal
+
+COntraste es una herramienta automatizada: reúne fuentes públicas y aplica reglas fijas para clasificar afirmaciones. Sus calificaciones son el resultado de ese método sobre las fuentes encontradas en un momento dado; no son una determinación judicial ni una opinión de sus creadores, pueden tener errores y cambian cuando aparece nueva evidencia. **Sus creadores, mantenedores y colaboradores no asumen responsabilidad por las conclusiones de la herramienta ni por el uso que se haga de ellas.** El texto completo está en [`AVISO_LEGAL.md`](AVISO_LEGAL.md), que el sitio muestra tal cual en `/aviso-legal`.
+
+## 12. Aportar y licencia
 
 COntraste es software libre bajo la [GNU Affero General Public License v3.0](LICENSE): puedes usarlo, estudiarlo, modificarlo y montarlo, y si ofreces una versión modificada como servicio web debes ofrecer su código fuente a quienes la usan (`SOURCE_URL` pone el enlace en el pie de página).
 

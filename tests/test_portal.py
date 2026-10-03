@@ -480,3 +480,14 @@ def test_version_diff_marks_removed_added_and_folds_unchanged_lines():
     assert rows[0] == {"op": "…", "n": 4}
     assert [r["op"] for r in rows[1:]] == [" ", "-", "+", "+"]
     assert (True, "Sin pruebas") in rows[2]["segs"] or any(c and "Sin" in t for c, t in rows[2]["segs"])
+
+
+def test_the_legal_notice_is_the_repository_text_and_every_check_links_it(client):
+    """One source: the site shows AVISO_LEGAL.md as it is in the repository; every page and every check link it."""
+    page = client.get("/aviso-legal")
+    assert page.status_code == 200
+    assert "<h2>Exclusión de responsabilidad</h2>" in page.text and "no asumen responsabilidad" in page.text
+    assert "<script" not in page.text.split('<section class="section prose legal">', 1)[1].split("</section>", 1)[0]
+    assert '/aviso-legal">Aviso legal</a>' in client.get("/").text
+    row = db.get(_new_article())
+    assert "no es una determinación judicial" in client.get(db.path_of(row)).text

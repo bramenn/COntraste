@@ -204,6 +204,7 @@
           <div><b>{{ consults }}</b><span>consultas</span></div>
         </div>
         <p class="muted">Revisado el {{ format_date(r.reviewed_at or row.created_at) }} · {{ plural(views, 'lectura', 'lecturas') }}</p>
+        <p class="muted legal-note">Calificación automática, con reglas fijas, sobre las fuentes que se encontraron: no es una determinación judicial ni una opinión de sus creadores, que no responden por ella. <a href="/aviso-legal">Aviso legal</a>.</p>
         <a class="link-more" href="/como-funciona">Cómo lo revisamos {{ ui('right', 16) }}</a>
       </section>
 

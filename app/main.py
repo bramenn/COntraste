@@ -17,6 +17,7 @@ from email.utils import format_datetime
 from xml.sax.saxutils import escape as xml_escape
 
 from fastapi import FastAPI, File, Form, Query, Request, UploadFile
+from markupsafe import Markup, escape
 from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse, RedirectResponse, Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.gzip import GZipMiddleware
@@ -1026,6 +1027,32 @@ USE_EN = ("COntraste publishes fact-checks so people are better informed. You ma
           "them to produce or spread disinformation: do not invert or alter their ratings, take claims out of context, "
           "present them as support for what they debunk, or generate false content from them. Credit COntraste and link "
           "the fact-check. COntraste takes no part in disinformation.")
+
+
+def simple_markdown(text: str) -> Markup:
+    """The few Markdown features AVISO_LEGAL.md uses (headings, paragraphs, lists, bold, links), so the site shows the
+    same text as the repository. The text is escaped first: only these tags come out."""
+    def inline(s: str) -> str:
+        s = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", str(escape(s)))
+        return re.sub(r"\[([^\]]+)\]\((https?://[^)\s]+)\)", r'<a href="\2">\1</a>', s)
+    out, items = [], []
+    for block in text.strip().split("\n\n"):
+        lines = [l.strip() for l in block.splitlines() if l.strip()]
+        if all(l.startswith("- ") for l in lines):
+            out.append("<ul>" + "".join(f"<li>{inline(l[2:])}</li>" for l in lines) + "</ul>")
+        elif lines[0].startswith("## "):
+            out.append(f"<h2>{inline(lines[0][3:])}</h2>")
+        elif lines[0].startswith("# "):
+            out.append(f"<h1>{inline(lines[0][2:])}</h1>")
+        else:
+            out.append(f"<p>{inline(' '.join(lines))}</p>")
+    return Markup("\n".join(out))
+
+
+@app.get("/aviso-legal", response_class=HTMLResponse)
+def legal_notice():
+    """The same text as AVISO_LEGAL.md in the repository: one source, never two versions."""
+    return page("aviso_legal.html", body=simple_markdown((settings.ROOT / "AVISO_LEGAL.md").read_text(encoding="utf-8")))
 
 
 @app.get("/robots.txt")
