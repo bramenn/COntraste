@@ -1,0 +1,10 @@
+{# How many checks this person has left, right where they spend them. #}
+{% if user %}
+<p class="quota{% if balance.total == 0 %} empty{% endif %}" data-balance-line>
+  {% if balance.total > 0 %}Te quedan <b data-balance>{{ balance.total }}</b> <span data-balance-word>{{ 'verificación' if balance.total == 1 else 'verificaciones' }}</span>{% if not balance.extra %} este mes{% endif %}, hasta {{ daily_limit() }} por día.
+  {% else %}Usaste tus verificaciones de este mes.{% endif %}
+  Se renuevan a {{ free_credits() }} el {{ renews_on() }}. Consultar algo ya verificado no gasta. <a href="/cuenta">Tu cuenta</a>
+</p>
+{% else %}
+<p class="quota">Con una cuenta gratis tienes {{ free_credits() }} verificaciones al mes, hasta {{ daily_limit() }} por día. Consultar lo que ya está verificado no necesita cuenta. <a href="/entrar">Entrar</a></p>
+{% endif %}

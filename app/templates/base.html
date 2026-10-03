@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="es-CO">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
+<title>{% block title %}Contraste · Verifica antes de compartir{% endblock %}</title>
+<meta name="description" content="{% block description %}Pega un enlace, sube una captura o escribe lo que te llegó. Contraste lo revisa en fuentes públicas de todo el mundo y en datos abiertos.{% endblock %}">
+<meta name="robots" content="{{ 'noindex, follow' if noindex else 'index, follow, max-image-preview:large, max-snippet:-1' }}">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#070b12">
+<link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/static/fonts/public-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/static/fonts/space-grotesk-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="{{ asset('app.css') }}">
+<link rel="alternate" type="application/rss+xml" title="Contraste" href="/feed.xml">
+{% if csrf %}<meta name="csrf" content="{{ csrf }}">{% endif %}
+{% if TURNSTILE %}<meta name="turnstile" content="{{ TURNSTILE }}">
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>{% endif %}
+{% block head %}{% endblock %}
+<script src="{{ asset('app.js') }}" defer></script>
+<script type="speculationrules">{"prerender": [{"eagerness": "moderate", "where": {"and": [{"href_matches": "/*"},
+  {"not": {"href_matches": ["/api/*", "/admin*", "/auth/*", "/dev/*", "/media/*", "/static/*", "/salir*", "/*.xml", "/*.png", "/*.webp", "/*.txt"]}},
+  {"not": {"selector_matches": "[download], [target=_blank]"}}]}}]}</script>
+</head>
+<body>
+{% from "_m.html" import ui %}
+<a class="skip" href="#main">Saltar al contenido</a>
+{% include "_art.html" %}
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="/" aria-label="Contraste, ir a la portada"><span class="logo" aria-hidden="true"></span><span class="brand-name">Contraste</span><span class="brand-tag">verificador</span></a>
+    <nav class="nav" aria-label="Secciones">
+      <a href="/archivo" {% if nav == 'archivo' %}aria-current="page"{% endif %}>Archivo</a>
+      <a href="/como-funciona" {% if nav == 'como' %}aria-current="page"{% endif %}>Cómo funciona</a>
+      <a href="/correcciones" {% if nav == 'correcciones' %}aria-current="page"{% endif %}>Correcciones</a>
+      <a href="/memoria" {% if nav == 'memoria' %}aria-current="page"{% endif %}>Memoria</a>
+    </nav>
+    {% if user %}<a class="acct{% if balance.total == 0 %} empty{% endif %}" href="/cuenta" data-balance-pill aria-label="Te quedan {{ balance.total }} verificaciones. Ver tu cuenta"><b data-balance>{{ balance.total }}</b><span class="acct-l">&nbsp;<span data-balance-word>{{ 'verificación' if balance.total == 1 else 'verificaciones' }}</span></span><span class="acct-s">&nbsp;disp.</span></a>
+    {% else %}<a class="acct" href="/entrar">Entrar</a>{% endif %}
+    <a class="icon-btn" href="/archivo" aria-label="Buscar">{{ ui('search', 22) }}</a>
+    <details class="menu">
+      <summary class="icon-btn" aria-label="Menú">{{ ui('menu', 22) }}</summary>
+      <nav class="menu-panel" aria-label="Menú">
+        <a href="/archivo">Archivo</a><a href="/como-funciona">Cómo funciona</a><a href="/correcciones">Correcciones</a><a href="/memoria">Memoria</a>
+      </nav>
+    </details>
+  </div>
+  <div class="tricolor" aria-hidden="true"></div>
+  {% set crawl = ticker() %}
+  {% if crawl %}
+  <div class="crawl" aria-label="Últimas verificaciones">
+    <span class="crawl-label"><span class="live-dot" aria-hidden="true"></span>En vivo</span>
+    <div class="crawl-view">
+      <div class="crawl-track" data-n="{{ crawl|length }}">
+        {% for copy in (0, 1) %}<ul class="crawl-list"{% if copy %} aria-hidden="true"{% endif %}>{% for t in crawl %}
+          <li><a href="{{ path_of(t) }}"{% if copy %} tabindex="-1"{% endif %}><span class="crawl-stamp c-{{ t.rating }}">{{ RATINGS[t.rating] }}</span>{{ t.title }}</a></li>{% endfor %}
+        </ul>{% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+  {% set mk = markets() %}
+  {% if mk %}
+  <div class="markets" aria-label="Indicadores del día">
+    <div class="wrap">
+      {% for m in mk %}<a class="mk" href="{{ m.url }}" rel="noopener" target="_blank" title="{{ m.source }} · {{ m.date }}">
+        <span class="mk-l">{{ m.label }}</span> <b>{{ market_value(m) }}</b> <span class="mk-d">{{ m.date[8:10] }}/{{ m.date[5:7] }}</span></a>{% endfor %}
+    </div>
+  </div>
+  {% endif %}
+  {% if not home_page %}
+  <div class="wrap head-row">
+    <form class="head-check" id="head-check" action="/" method="get" role="search" aria-label="Verificar algo">
+      <label for="hq" class="sr-only">Enlace o afirmación para verificar</label>
+      <input id="hq" name="texto" type="text" autocomplete="off" maxlength="3000" placeholder="Verificar algo: pega un enlace o escribe lo que te llegó">
+      <button type="submit" class="btn primary">Verificar</button>
+    </form>
+  </div>
+  {% endif %}
+</header>
+{% set sections = topics_in_use() %}{% if sections %}
+<nav class="sections" aria-label="Secciones">
+  <div class="wrap">{% for k, v in sections if k != 'otro' %}<a href="/archivo?tema={{ k }}" {% if topic == k %}aria-current="page"{% endif %}>{{ v }}</a>{% endfor %}</div>
+</nav>
+{% endif %}
+{% if DEMO %}<div class="banner"><div class="wrap">Modo demostración: se muestran casos de ejemplo.</div></div>{% endif %}
+<main id="main">{% block main %}{% endblock %}</main>
+{% if survey_prompt is defined %}
+<aside class="survey-toast" id="survey-toast" aria-label="Encuesta" hidden>
+  <p><b>¿Nos ayudas a mejorar Contraste?</b> Es 1 minuto{% if survey_prompt %} y te damos {{ survey_prompt }} verificaciones gratis{% endif %}.</p>
+  <p><a class="btn primary" href="/encuesta">Responder</a> <button class="btn" type="button" data-dismiss>Ahora no</button></p>
+</aside>
+{% endif %}
+{% if not user %}
+<dialog class="login-dialog" id="login-dialog" aria-labelledby="login-title">
+  <h2 id="login-title">Crea tu cuenta para verificar esto</h2>
+  <p>Te damos {{ free_credits() }} verificaciones gratis cada mes. Guardamos lo que escribiste.</p>
+  {% include "_login.html" %}
+  <form method="dialog"><button class="btn">Ahora no</button></form>
+</dialog>
+{% endif %}
+<footer class="site-foot">
+  <section class="wrap almanaque" aria-labelledby="alm-t">
+    <p class="kicker">Archivo histórico</p>
+    <h2 id="alm-t">Memoria</h2>
+    <p class="alm-sub">Fechas de nuestra historia que conviene no olvidar, cada una con su fuente</p>
+    <ol>{% for e in memoria_highlights() %}
+      <li><a class="alm-item" href="{{ e.source.url }}" rel="noopener" target="_blank">
+        <svg class="art" aria-hidden="true"><use href="#art-{{ e.icon }}"/></svg>
+        <b>{{ e.year }}</b><span>{{ e.title }}</span>
+        <small class="alm-src">Fuente: {{ e.source.name }} ↗</small>
+      </a></li>{% endfor %}
+    </ol>
+    <a class="btn primary alm-cta" href="/memoria">Ver la memoria completa, con sus fuentes {{ ui('right', 16) }}</a>
+  </section>
+  <div class="wrap">
+    <b><span class="logo" aria-hidden="true"></span> Contraste · Solo evidencia · Sin perfiles públicos</b>
+    <span><a href="/como-funciona">Cómo funciona</a> · <a href="/correcciones">Correcciones</a> · <a href="/privacidad">Privacidad</a> · <a href="/feed.xml">RSS</a> · <a href="{{ SOURCE_URL }}" rel="noopener">Código fuente</a></span>
+  </div>
+</footer>
+</body>
+</html>

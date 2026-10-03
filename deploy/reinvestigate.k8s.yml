@@ -1,0 +1,29 @@
+# One-off: investigate every published check again with the current method and rules.
+#   kubectl -n contraste delete job reinvestigate --ignore-not-found && kubectl apply -f deploy/reinvestigate.k8s.yml
+#   kubectl -n contraste logs -f job/reinvestigate
+# Stops before today's model spend reaches half the daily limit; run it again later to finish the rest.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: reinvestigate
+  namespace: contraste
+  labels: {app: contraste, component: reinvestigate}
+spec:
+  backoffLimit: 0                  # a failed run is read and re-launched by hand, never retried blindly (it spends)
+  ttlSecondsAfterFinished: 86400
+  template:
+    metadata:
+      labels: {app: contraste, component: reinvestigate}
+    spec:
+      restartPolicy: Never
+      imagePullSecrets: [{name: ghcr-pull}]
+      containers:
+      - name: reinvestigate
+        image: ghcr.io/bramenn/contraste:latest
+        imagePullPolicy: Always
+        command: [python, -m, app.reinvestigate_all]
+        envFrom:
+        - secretRef: {name: contraste-env}
+        resources:
+          requests: {cpu: 250m, memory: 1500Mi}
+          limits: {cpu: 2, memory: 4Gi}

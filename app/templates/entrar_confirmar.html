@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Entrar · Contraste{% endblock %}
+{% block main %}
+<div class="wrap narrow"><section class="section stack">
+  <h1>Entrar como {{ email }}</h1>
+  <p>Si no pediste este enlace o no es tu correo, cierra esta página.</p>
+  <form method="post" action="/auth/magic/{{ token }}"><button class="btn primary" type="submit">Entrar</button></form>
+</section></div>
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% set nav = 'como' %}
+{% block title %}Cómo funciona · Contraste{% endblock %}
+{% block description %}Cómo verifica Contraste: fuentes de todo el mundo, datos abiertos, independencia por dueño de los medios y reglas fijas que no dependen de nadie.{% endblock %}
+{% block main %}
+<div class="wrap">
+<section class="section prose">
+  <h1>Cómo funciona</h1>
+  <p>No hay comentarios, votos ni perfiles públicos: nadie puede influir en una calificación. Las cuentas solo sirven para pedir verificaciones nuevas y aportar evidencia, y nunca se muestra quién pidió qué. La única voz es la evidencia.</p>
+
+  <h2>El proceso</h2>
+  <ol>
+    <li><strong>Leer.</strong> Tomamos el texto de la publicación y, si es video, transcribimos el audio. De las imágenes leemos el texto sin identificar a nadie por su rostro.</li>
+    <li><strong>Separar.</strong> Lo que se puede comprobar se investiga. Opinión, sátira y predicciones se marcan como «No verificable».</li>
+    <li><strong>Buscar.</strong> En Colombia y en el resto del mundo: datos oficiales, organismos internacionales, verificadores de la red internacional y medios de distintos dueños y líneas editoriales. Si hay una cifra, consultamos directamente los datos abiertos (datos.gov.co y Banco Mundial).</li>
+    <li><strong>Recordar.</strong> Guardamos los párrafos de las fuentes confiables que ya leímos. En cada verificación nueva buscamos ahí también, porque los buscadores dejan de mostrar informes y documentos viejos. Lo que recordamos se vuelve a descargar y a revisar ese día: si la página cambió o ya no existe, no cuenta. Nuestras propias verificaciones nunca se usan como prueba.</li>
+    <li><strong>Ir al fondo.</strong> Si una fuente cita un informe, un PDF, un documento oficial u otra fuente, la abrimos y la leemos también, hasta dos saltos. Así llegamos al dato original y no nos quedamos con lo que alguien dijo que decía.</li>
+    <li><strong>Contrastar.</strong> Una cita solo cuenta si aparece textualmente en la fuente. Un programa propone la calificación y el servidor la revisa con reglas fijas.</li>
+  </ol>
+
+  <h2>Reglas que no dependen de nadie</h2>
+  <ul>
+    <li><strong>Verdadero o Falso</strong> exige al menos dos fuentes independientes: de <em>dueños distintos</em> y sin interés en el caso, con al menos una oficial, verificadora o de un medio reconocido.</li>
+    <li><strong>Mismo dueño, una sola voz.</strong> Dos medios del mismo grupo empresarial cuentan como una fuente. Si más de la mitad de las fuentes son de un mismo dueño y no hay un documento o dato primario, la calificación no puede ser Verdadero ni Falso.</li>
+    <li><strong>Versión de parte.</strong> Si la fuente, o su dueño, es protagonista de lo que se afirma (la empresa, el gobierno o la persona de la que se habla), mostramos su versión, pero no cuenta como confirmación.</li>
+    <li><strong>El documento, no lo que dicen de él.</strong> Cuando existe el registro que constituye el hecho (el resultado certificado, la ley publicada, la sentencia, la tabla de datos), lo leemos directamente en vez de lo que alguien cuenta de él.</li>
+    <li><strong>Lo oficial no es cierto por ser oficial.</strong> Lo que dice un gobierno o una entidad es una versión más, que se contrasta como cualquier otra. Si habla de su propia gestión es parte interesada y no cuenta como confirmación. Un periodismo independiente que lo contradice con fundamento pesa igual.</li>
+    <li><strong>Cada cosa en su momento.</strong> Una afirmación se juzga en el momento al que se refiere. Una nota publicada antes de ese momento no la desmiente: describe una situación anterior, y la mostramos como contexto.</li>
+    <li><strong>Enciclopedias abiertas, solo como pista.</strong> Wikipedia y las enciclopedias que escribe una máquina no cuentan como prueba; seguimos sus referencias hasta la fuente original.</li>
+    <li>Si las fuentes se contradicen, la calificación no pasa de «Engañoso». Lo que envía la persona, las redes sociales y los foros nunca cuentan como prueba.</li>
+    <li><strong>Sitios desconocidos.</strong> Una página que no es un medio, verificador ni entidad reconocida se muestra, pero por sí sola no cambia una calificación: crear páginas es gratis. Los sitios de una misma plataforma de blogs gratuitos cuentan como un solo dueño.</li>
+    <li><strong>Verificaciones que se ayudan.</strong> Cuando una verificación nueva encuentra fuentes que sirven para otra ya publicada sobre un tema cercano, la otra se revisa con ellas. Si la calificación cambiaría, lo decide una persona del equipo.</li>
+  </ul>
+
+  <h2>Estándares que seguimos</h2>
+  <p>Nos guiamos por el Código de Principios de la Red Internacional de Verificación de Datos (IFCN), el Código Europeo de Estándares para verificadores independientes (EFCSN) y las metodologías de verificadores de la región como Colombiacheck y Chequeado:</p>
+  <ul>
+    <li><strong>Mismo rigor para todos</strong>, sin importar a qué sector político favorezca o perjudique una afirmación.</li>
+    <li><strong>Al menos dos fuentes con nombre</strong> para lo central, y primarias cuando existen.</li>
+    <li><strong>Lo que respalda y lo que contradice:</strong> mostramos las dos cosas, con enlace a cada fuente.</li>
+    <li><strong>Replicable:</strong> cada verificación dice con qué búsquedas se hizo y cuándo, para que cualquiera la pueda repetir.</li>
+    <li><strong>Correcciones abiertas:</strong> todo cambio queda en el historial del artículo y en <a href="/correcciones">Correcciones</a>.</li>
+    <li><strong>Derecho de réplica:</strong> la persona o entidad de la que habla una verificación puede responder desde el mismo artículo; lo lee una persona del equipo.</li>
+  </ul>
+  <p><strong>Dónde no llegamos todavía.</strong> Las verificaciones las hace un sistema automatizado con reglas fijas. Por eso no contactamos a quien hizo la afirmación antes de publicar, y no todas pasan por una edición humana antes de salir: cada artículo dice si fue revisado por el equipo o si es automatizado. Los estándares profesionales piden ambas cosas; el derecho de réplica y la revisión editorial son la forma en que lo compensamos.</p>
+
+  <h2>Las calificaciones</h2>
+  <ul>
+    <li><strong>Verdadero:</strong> confirmado por fuentes independientes.</li>
+    <li><strong>Cierto, con matices:</strong> cierto en lo principal, pero le falta contexto.</li>
+    <li><strong>Engañoso:</strong> mezcla hechos reales con conclusiones que no se sostienen, o saca algo de contexto.</li>
+    <li><strong>Falso:</strong> desmentido por fuentes independientes.</li>
+    <li><strong>Sin pruebas:</strong> no hay evidencia suficiente en ningún sentido. «No se sabe» también es una respuesta.</li>
+    <li><strong>No verificable:</strong> opinión, sátira o predicción.</li>
+  </ul>
+
+  <h2>Qué se publica</h2>
+  <p>Cada verificación tiene su página. Aparece en portada, búsqueda y buscadores externos solo si tiene al menos {{ min_sources }} fuentes válidas, al menos una oficial o de un verificador, y ninguna regla de seguridad se activó. Si trata sobre una persona que no es figura pública, no se lista. No volvemos a publicar el contenido original: mostramos una miniatura pequeña con la calificación encima y los rostros difuminados, o la tarjeta del caso.</p>
+
+  <h2 id="prioridad">Cómo ordenamos la portada</h2>
+  <p class="formula">puntaje = (consultas_24h × 3 + lecturas_24h) × 0,5^(horas ÷ 18) × calidad</p>
+  <p>Las consultas pesan el triple porque muestran lo que se está volviendo viral. El puntaje se reduce a la mitad cada 18 horas y se recalcula cada 10 minutos. Calidad: 1,0 con fuentes oficiales o de verificadores; 0,7 si solo hay medios.</p>
+
+  <h2>Cómo contamos las lecturas</h2>
+  <p>Sin cookies ni analítica de terceros. Una lectura cuenta si la página estuvo visible 5 segundos. Contamos una por visitante al día con una huella anónima cuya clave cambia a diario y se borra. No guardamos direcciones IP ni datos del navegador (Ley 1581 de 2012).</p>
+
+  <h2>Correcciones</h2>
+  <p>Si nos equivocamos, lo corregimos a la vista en el artículo y en <a href="/correcciones">correcciones</a>.</p>
+</section>
+</div>
+{% endblock %}

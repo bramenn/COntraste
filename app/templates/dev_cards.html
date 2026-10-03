@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Tarjetas · desarrollo{% endblock %}
+{% block main %}
+<div class="wrap">
+<section class="section">
+  <h1>Tarjetas: todos los formatos y calificaciones</h1>
+  <p class="hint">Página interna. Usa el caso de ejemplo cambiando solo la calificación general. Las imágenes se generan al cargar.</p>
+  {% for k, v in RATINGS.items() %}
+  <h2 class="mt-s">{{ v }}</h2>
+  <div class="cards-grid mb-m">
+    {% for fmt, (w, h) in formats.items() %}
+    <figure><a href="/dev/cards/{{ k }}/{{ fmt }}.png"><img loading="lazy" src="/dev/cards/{{ k }}/{{ fmt }}.png" width="{{ w }}" height="{{ h }}" alt="{{ v }}, formato {{ fmt }}"></a>
+      <figcaption>{{ fmt }} · {{ w }}×{{ h }}</figcaption></figure>
+    {% endfor %}
+  </div>
+  {% endfor %}
+</section>
+</div>
+{% endblock %}

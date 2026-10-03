@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Memoria: Colombia en datos verificados · Contraste{% endblock %}
+{% block description %}Hechos de la historia de Colombia, su patrimonio y sus logros. Cada uno enlaza a la fuente que lo dice.{% endblock %}
+{% block head %}<link rel="canonical" href="{{ BASE }}/memoria">{% endblock %}
+{% block main %}
+<div class="wrap memoria">
+  <header class="mem-hero">
+    <p class="kicker">Memoria verificada</p>
+    <h1>Colombia, en datos verificados</h1>
+    <p class="mem-lead">Hechos de nuestra historia, nuestro patrimonio y nuestros logros. Cada uno enlaza a la fuente que lo dice: no publicamos un dato que no podamos mostrarte.</p>
+    <div class="tricolor mem-tri" aria-hidden="true"></div>
+  </header>
+
+  <section class="mem-stats" aria-label="Colombia en cifras">
+    {% for s in stats %}<a class="mem-stat" href="{{ s.source.url }}" rel="noopener" target="_blank">
+      <b>{{ s.value }}</b><span>{{ s.label }}</span><small>Fuente: {{ s.source.name }}</small></a>{% endfor %}
+  </section>
+
+  <nav class="mem-eras" aria-label="Épocas">
+    {% for era in eras %}<a href="#era-{{ loop.index }}">{{ era.name }}</a>{% endfor %}<a href="#patrimonio">Patrimonio Mundial</a>
+  </nav>
+
+  {% for era in eras %}
+  <section class="mem-era" id="era-{{ loop.index }}" aria-labelledby="era-t-{{ loop.index }}">
+    <h2 id="era-t-{{ loop.index }}"><span class="mem-era-n">0{{ loop.index }}</span>{{ era.name }}</h2>
+    <ol class="mem-line">
+      {% for e in era.events %}
+      <li class="mem-ev">
+        <div class="mem-when"><b>{{ e.year }}</b>{% if e.date %}<span>{{ e.date }}</span>{% endif %}</div>
+        <div class="mem-card">
+          <svg class="art" aria-hidden="true"><use href="#art-{{ e.icon }}"/></svg>
+          <div>
+            <h3>{{ e.title }}</h3>
+            <p>{{ e.text }}</p>
+            <a class="mem-src" href="{{ e.source.url }}" rel="noopener" target="_blank">Fuente: {{ e.source.name }} ↗</a>
+          </div>
+        </div>
+      </li>{% endfor %}
+    </ol>
+  </section>
+  {% endfor %}
+
+  <section class="mem-heritage" id="patrimonio" aria-labelledby="pat-t">
+    <h2 id="pat-t">Patrimonio Mundial</h2>
+    <p>Los {{ heritage.sites|length }} lugares de Colombia en la lista de la UNESCO.</p>
+    <ul>{% for s in heritage.sites %}<li><svg class="art" aria-hidden="true"><use href="#art-columna"/></svg>{{ s.name }}</li>{% endfor %}</ul>
+    <a class="mem-src" href="{{ heritage.source.url }}" rel="noopener" target="_blank">Fuente: {{ heritage.source.name }} ↗</a>
+  </section>
+
+  <p class="mem-foot">{{ total }} hechos · fuentes revisadas el {{ format_date(checked ~ 'T12:00:00+00:00') }}. Cada dato dice solo lo que dice su fuente. ¿Ves un error? Lo corregimos en público: <a href="/correcciones">Correcciones</a>.</p>
+</div>
+{% endblock %}

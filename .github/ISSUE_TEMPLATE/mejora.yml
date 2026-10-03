@@ -1,0 +1,18 @@
+name: Propuesta de mejora
+description: Una idea para que Contraste verifique mejor o sea más útil.
+title: "[Mejora] "
+labels: ["mejora"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Qué problema resuelve
+      description: Un caso real ayuda mucho.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: Qué propones
+    validations:
+      required: true

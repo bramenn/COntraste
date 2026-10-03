@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% from "_m.html" import badge %}
+{% block title %}Panel editorial · Contraste{% endblock %}
+{% block main %}
+<div class="wrap admin">
+<section class="section">
+{% if view == 'login' %}
+  <h1>Panel editorial</h1>
+  {% if not configured %}<p class="note mt-s">Define <code>ADMIN_PASSWORD</code> en el archivo <code>.env</code> y reinicia para activar el panel.</p>
+  {% else %}
+  <form method="post" action="/admin/login" class="stack">
+    <label for="pw">Contraseña</label>
+    <input id="pw" type="password" name="password" autocomplete="current-password" required>
+    {% if error %}<p class="form-error" role="alert">{{ error }}</p>{% endif %}
+    <p><button class="btn primary" type="submit">Entrar</button></p>
+  </form>
+  {% endif %}
+{% elif view == 'list' %}
+  <div class="section-head"><h1>Artículos</h1>
+    <a class="btn" href="/admin/negocio">Cuentas y límites</a>
+    <a class="btn" href="/admin/encuesta">Encuesta</a>
+    <form method="post" action="/admin/logout"><button class="btn" type="submit">Salir</button></form></div>
+  {% if replies %}<p class="note warn">Derecho de réplica sin atender: {% for p in replies %}<a href="/admin/a/{{ p.article_id }}">{{ p.title|truncate(50) }} ({{ p.n }})</a>{{ ' · ' if not loop.last }}{% endfor %}</p>{% endif %}
+  {% if spend.warn %}<p class="note warn">Gasto en modelos hoy: {{ usd(spend.today) }} de {{ usd(spend.cap) }} ({{ spend.pct }} %).{% if spend.paused %} Las verificaciones nuevas están pausadas hasta mañana.{% endif %}</p>{% endif %}
+  <div class="filters mb-m">
+    <a href="/admin" {% if not status_filter %}aria-current="true"{% endif %}>Todos</a>
+    <a href="/admin?estado=listed" {% if status_filter == 'listed' %}aria-current="true"{% endif %}>Publicados</a>
+    <a href="/admin?estado=unlisted" {% if status_filter == 'unlisted' %}aria-current="true"{% endif %}>No listados</a>
+    <a href="/admin?estado=removed" {% if status_filter == 'removed' %}aria-current="true"{% endif %}>Retirados</a>
+  </div>
+  <table>
+    <thead><tr><th>Artículo</th><th>Calificación</th><th>Estado</th><th>Fecha</th></tr></thead>
+    <tbody>{% for row in rows %}
+      <tr><td><a href="/admin/a/{{ row.id }}">{{ row.title }}</a></td><td>{{ badge(row.rating) }}</td>
+          <td>{{ {'listed': 'Publicado', 'unlisted': 'No listado', 'removed': 'Retirado'}[row.status] }}{% if row.unlisted_reason %}<br><small>{{ row.unlisted_reason }}</small>{% endif %}</td>
+          <td>{{ format_date(row.created_at) }}</td></tr>
+    {% endfor %}</tbody>
+  </table>
+{% elif view == 'edit' %}
+  <p><a href="/admin">← Artículos</a></p>
+  <h1 class="mt-s">{{ r.title }}</h1>
+  <p class="mt-s">{{ badge(r.rating) }} · <a href="{{ path_of(row) }}">Ver artículo</a> · Estado: {{ {'listed': 'Publicado', 'unlisted': 'No listado', 'removed': 'Retirado'}[row.status] }}{% if row.reinvestigating %} · Reinvestigando…{% endif %}</p>
+
+  <div class="row-actions mt-s">
+    {% for st, lbl in [('listed', 'Publicar'), ('unlisted', 'Pasar a no listado'), ('removed', 'Despublicar')] %}{% if row.status != st %}
+    <form method="post" action="/admin/a/{{ row.id }}/status"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="status" value="{{ st }}"><button class="btn" type="submit">{{ lbl }}</button></form>
+    {% endif %}{% endfor %}
+    <form method="post" action="/admin/a/{{ row.id }}/reinvestigate"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="btn" type="submit">Reinvestigar</button></form>
+    <form method="post" action="/admin/a/{{ row.id }}/reviewed"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="btn" type="submit">{{ 'Marcar revisada de nuevo' if row.human_reviewed_at else 'Marcar como revisada' }}</button></form>
+  </div>
+
+  <form method="post" action="/admin/a/{{ row.id }}/correct" class="stack">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <fieldset class="stack"><legend>Corrección (queda en el historial público)</legend>
+      <label>Calificación general <select name="rating">{% for k, v in RATINGS.items() %}<option value="{{ k }}" {% if k == r.rating %}selected{% endif %}>{{ v }}</option>{% endfor %}</select></label>
+      <label>Veredicto en una frase <textarea name="headline" rows="2">{{ r.headline }}</textarea></label>
+      {% for c in r.claims %}
+      <fieldset class="stack"><legend>{{ c.short }}</legend>
+        <select name="claim_rating_{{ loop.index0 }}" aria-label="Calificación de la afirmación">{% for k, v in RATINGS.items() %}<option value="{{ k }}" {% if k == c.rating %}selected{% endif %}>{{ v }}</option>{% endfor %}</select>
+        <textarea name="claim_explanation_{{ loop.index0 }}" rows="3" aria-label="Explicación">{{ c.explanation }}</textarea>
+      </fieldset>
+      {% endfor %}
+      <label>Nota pública de la corrección (obligatoria) <textarea name="note" rows="2" required></textarea></label>
+      <p><button class="btn primary" type="submit">Guardar corrección</button></p>
+    </fieldset>
+  </form>
+
+  {% if replies %}<h2 class="mt-s">Derecho de réplica</h2>
+  <ul>{% for p in replies %}<li><b>{{ p.name }}</b>{% if p.email %} · {{ p.email }}{% endif %} · {{ p.status }}<br>{{ p.message }}{% if p.url %}<br><a href="{{ p.url }}" rel="noopener noreferrer nofollow" target="_blank">{{ p.url|truncate(80) }}</a>{% endif %}
+    {% if p.status == 'new' %}<form method="post" action="/admin/a/{{ row.id }}/reply_done"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="id" value="{{ p.id }}"><button class="btn" type="submit">Atendida (borra el correo)</button></form>{% endif %}</li>{% endfor %}</ul>
+  <p class="muted">Si la réplica cambia algo, corrige el artículo abajo: queda en el historial público.</p>{% endif %}
+  {% if changes %}<h2 class="mt-s">Historial</h2>
+  <ul>{% for c in changes %}<li>{{ format_date(c.at) }} · {{ c.kind }} · {{ c.note }}</li>{% endfor %}</ul>{% endif %}
+  {% if r.audit %}<h2 class="mt-s">Auditoría</h2>
+  <p>Citas descartadas: {{ r.audit.quotes_rejected|length }} · Páginas con inyección: {{ r.audit.page_injections|length }} · Inyección en la entrada: {{ r.audit.input_injection or 'no' }}</p>{% endif %}
+{% elif view == 'business' %}
+  <div class="section-head"><h1>Cuentas y límites</h1><a class="btn" href="/admin/encuesta">Encuesta</a><a class="btn" href="/admin">Artículos</a></div>
+  {% if msg %}<p class="note">{{ msg }}</p>{% endif %}
+
+  <h2>Configuración</h2>
+  <form method="post" action="/admin/negocio/settings" class="stack"><input type="hidden" name="csrf" value="{{ csrf }}">
+    <label>Verificaciones por cuenta cada mes <input type="text" name="free_monthly_credits" inputmode="numeric" value="{{ free_n }}" required></label>
+    <p class="muted">Si la subes, todas las cuentas reciben la diferencia este mes. Si la bajas, no se le quita nada a nadie este mes.</p>
+    <label>Máximo de verificaciones por cuenta cada día <input type="text" name="daily_checks" inputmode="numeric" value="{{ daily_n }}" required></label>
+    <p class="muted">El día es el de Colombia. Las verificaciones rechazadas que devolvimos no cuentan.</p>
+    <label>Verificaciones de regalo por responder la encuesta <input type="text" name="survey_reward" inputmode="numeric" value="{{ survey_reward }}" required></label>
+    <p><button class="btn primary" type="submit">Guardar</button></p></form>
+  <p class="{{ 'note warn' if spend.warn else 'note' }}">Gasto en modelos hoy: <b>{{ usd(spend.today) }}</b> de {{ usd(spend.cap) }} ({{ spend.pct }} %).
+    {% if spend.paused %}Las verificaciones nuevas están pausadas hasta mañana.{% endif %}</p>
+  <p>Costo real promedio por verificación (30 días, {{ avg.n }}): <b>{{ usd(avg.usd) }}</b>.</p>
+
+  <h2 class="mt-s">Aportes por decidir</h2>
+  <p class="muted">«Congelado»: llegaron muchos aportes seguidos al mismo artículo. «Cambia la calificación» o «sitio sin catalogar»: la máquina ya investigó y el resultado espera tu visto bueno. Abre las fuentes con cuidado: las envió un lector.</p>
+  {% if frozen %}<table><tr><th>Artículo</th><th>Estado</th><th>Fuentes</th><th>Nota (no publicada)</th><th></th></tr>{% for c in frozen %}
+    <tr><td>{{ c.title }}<br><small>{% if c.origin_title %}Validación cruzada desde «{{ c.origin_title }}»{% else %}afirmación {{ c.claim_index + 1 }}{% endif %}</small></td>
+      <td>{% if c.status == 'frozen' %}Congelado{% else %}{{ RATINGS[c.old_rating] }}{% if c.new_rating and c.new_rating != c.old_rating %} → <b>{{ RATINGS[c.new_rating] }}</b>{% else %} (sin cambio; sitio sin catalogar){% endif %}{% endif %}</td>
+      <td>{% for u in c.urls %}<a href="{{ u }}" rel="noopener noreferrer nofollow" target="_blank">{{ u|truncate(60) }}</a><br>{% endfor %}</td>
+      <td>{{ c.note }}</td><td class="row-actions">
+      {% for a, l in ([('process', 'Investigar')] if c.status == 'frozen' else [('approve', 'Aplicar')]) + [('reject', 'Rechazar')] %}<form method="post" action="/admin/negocio/{{ a }}"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="id" value="{{ c.id }}"><button class="btn" type="submit">{{ l }}</button></form>{% endfor %}</td></tr>{% endfor %}</table>
+  {% else %}<p class="muted">Ninguno.</p>{% endif %}
+
+  <h2 class="mt-s">Dar o quitar verificaciones</h2>
+  <form method="post" action="/admin/negocio/adjust" class="stack"><input type="hidden" name="csrf" value="{{ csrf }}">
+    <label>Correo <input type="text" name="email" required></label>
+    <label>Verificaciones (negativo para quitar) <input type="text" name="amount" inputmode="numeric" required></label>
+    <label>Motivo <input type="text" name="note" required maxlength="200"></label>
+    <p><button class="btn" type="submit">Aplicar ajuste</button></p></form>
+
+  <h2 class="mt-s">Bloquear o desbloquear una cuenta</h2>
+  <form method="post" action="/admin/negocio/block" class="stack"><input type="hidden" name="csrf" value="{{ csrf }}">
+    <label>Correo <input type="text" name="email" required></label>
+    <p><button class="btn" type="submit">Bloquear</button> <button class="btn" type="submit" formaction="/admin/negocio/unblock">Desbloquear</button></p></form>
+
+{% elif view == 'survey' %}
+  <div class="section-head"><h1>Encuesta</h1><a class="btn" href="/admin/encuesta.csv">Descargar CSV</a><a class="btn" href="/admin/negocio">Cuentas y límites</a></div>
+  <p>{{ s.n }} respuestas.{% if s.n < 30 %} <span class="muted">Con menos de 30 respuestas los porcentajes cambian mucho; tómalos como pista, no como conclusión.</span>{% endif %}</p>
+
+  <h2 class="mt-s">¿Qué tan necesario es? (prueba de Sean Ellis)</h2>
+  <p class="{{ 'note' if s.very_pct >= 40 else 'note warn' }}"><b>{{ s.very_pct }} %</b> estaría muy decepcionado sin Contraste. La referencia es 40 %: por encima, el producto ya es imprescindible para un grupo de personas; por debajo, conviene mejorar antes de buscar más usuarios.</p>
+  <table>{% for label, n, pct in s.pmf %}<tr><td>{{ label }}</td><td>{{ n }}</td><td>{{ pct }} %</td></tr>{% endfor %}</table>
+
+  <h2 class="mt-s">Para qué lo usan</h2>
+  <table>{% for label, n, pct in s.uses %}<tr><td>{{ label }}</td><td>{{ n }}</td><td>{{ pct }} %</td></tr>{% endfor %}</table>
+
+  <h2 class="mt-s">Qué mejorar primero</h2>
+  <table>{% for label, n, pct in s.improve %}<tr><td>{{ label }}</td><td>{{ n }}</td><td>{{ pct }} %</td></tr>{% endfor %}</table>
+
+
+  <h2 class="mt-s">Comentarios</h2>
+  {% if s.texts %}<ul>{% for a in s.texts %}<li>{% if a.benefit %}<b>Le sirve:</b> {{ a.benefit }}{% endif %}{% if a.benefit and a.improve_text %}<br>{% endif %}{% if a.improve_text %}<b>Mejorar:</b> {{ a.improve_text }}{% endif %}</li>{% endfor %}</ul>
+  {% else %}<p class="muted">Todavía no hay comentarios.</p>{% endif %}
+{% endif %}
+</section>
+</div>
+{% endblock %}

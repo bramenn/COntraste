@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Tu cuenta · Contraste{% endblock %}
+{% set KIND = {"monthly_grant": "Verificaciones del mes", "spend": "Uso", "refund": "Devolución", "reward": "Premio por aporte aceptado", "admin_adjust": "Ajuste"} %}
+{% set CSTATUS = {"queued": "En revisión", "frozen": "En revisión por el equipo", "review": "En revisión por el equipo", "accepted": "Aceptado", "rejected": "No aceptado"} %}
+{% block main %}
+<div class="wrap narrow"><section class="section stack account">
+  <h1>Tu cuenta</h1>
+  <p class="muted">{{ user.email }}</p>
+  <div class="facts"><div class="nums">
+    <div><b>{{ balance.total }}</b><span>verificaciones disponibles</span></div>
+    {% if balance.extra %}<div><b>{{ balance.free }}</b><span>de este mes</span></div>
+    <div><b>{{ balance.extra }}</b><span>de regalo, no vencen</span></div>{% endif %}
+    <div><b>{{ [daily_limit() - used_today, 0]|max }}</b><span>disponibles hoy</span></div>
+  </div></div>
+  <p class="muted">Contraste es gratis. Cada mes tienes {{ free_credits() }} verificaciones, hasta {{ daily_limit() }} por día; se renuevan el {{ renews_on() }}. Consultar algo que ya está verificado no gasta.</p>
+  {% if no_credits %}<p class="note warn">Usaste tus verificaciones de este mes. Vuelven el {{ renews }}. Mientras tanto puedes consultar todo el archivo.</p>{% endif %}
+
+  <h2>Tus verificaciones</h2>
+  {% if checks %}<ul class="list">{% for c in checks %}
+    <li><span class="t">{% if c.aid %}<a href="{{ path_of({'id': c.aid, 'slug': c.slug, 'created_at': c.a_created}) }}">{{ c.title }}</a>{% else %}{{ c.error or 'En curso' }}{% endif %}</span>
+      <span class="meta">{{ format_date(c.created_at.isoformat()) }}</span></li>{% endfor %}</ul>
+  {% else %}<p class="empty">Todavía no has pedido verificaciones.</p>{% endif %}
+
+  <h2>Tus aportes</h2>
+  {% if contribs %}<ul class="list">{% for c in contribs %}
+    <li><span class="t"><a href="{{ path_of({'id': c.article_id, 'slug': c.slug, 'created_at': c.a_created}) }}">{{ c.title }}</a></span>
+      <span class="meta"><b>{{ CSTATUS[c.status] }}</b>{% if c.outcome %} · {{ c.outcome }}{% endif %}</span></li>{% endfor %}</ul>
+  {% else %}<p class="empty">No has aportado evidencia.</p>{% endif %}
+
+  <h2>Movimientos</h2>
+  {% if ledger %}<table class="cost"><thead><tr><th scope="col">Fecha</th><th scope="col">Movimiento</th><th scope="col">Verificaciones</th></tr></thead>
+    <tbody>{% for m in ledger %}<tr><td data-label="Fecha">{{ format_date(m.created_at.isoformat()) }}</td>
+      <td data-label="Movimiento">{{ m.note or KIND[m.kind] }}</td><td data-label="Verificaciones">{{ '%+d'|format(m.amount) }}</td></tr>{% endfor %}</tbody></table>
+  {% else %}<p class="empty">Sin movimientos.</p>{% endif %}
+
+
+  <form method="post" action="/salir"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="btn">Salir</button></form>
+
+  <details class="plain danger">
+    <summary>Eliminar mi cuenta</summary>
+    <form method="post" action="/cuenta/eliminar" class="stack">
+      <p>Borramos tu correo y cerramos tus sesiones. Los créditos que te queden se pierden. Las verificaciones publicadas siguen disponibles, sin ningún dato tuyo.</p>
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <label>Escribe «eliminar» para confirmar <input type="text" name="confirm" required autocomplete="off"></label>
+      <button class="btn">Eliminar mi cuenta</button>
+    </form>
+  </details>
+</section></div>
+{% endblock %}

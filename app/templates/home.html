@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% set home_page = True %}
+{% from "_m.html" import ui, badge, cardx, thumb, plural %}
+{% block head %}
+<link rel="canonical" href="{{ BASE }}/">
+<meta property="og:type" content="website"><meta property="og:site_name" content="Contraste"><meta property="og:locale" content="es_CO">
+<meta property="og:title" content="Contraste · ¿Es cierto lo que te llegó?"><meta property="og:url" content="{{ BASE }}/">
+<meta property="og:description" content="Verificamos enlaces, videos, capturas y afirmaciones con fuentes de todo el mundo y datos abiertos.">
+<script type="application/ld+json">{{ {"@context": "https://schema.org", "@type": "WebSite", "name": "Contraste", "url": BASE ~ "/", "inLanguage": "es-CO", "potentialAction": {"@type": "SearchAction", "target": BASE ~ "/archivo?q={search_term_string}", "query-input": "required name=search_term_string"}}|tojson }}</script>
+{% endblock %}
+{% block main %}
+<div class="wrap">
+  <section class="hero" aria-labelledby="hero-title">
+    <h1 id="hero-title">¿Es cierto?</h1>
+    <form class="checker" id="checker" action="/api/checks" method="post" enctype="multipart/form-data" novalidate>
+      <label for="q" class="sr-only">Enlace, texto o imagen para verificar</label>
+      <textarea id="q" name="text" rows="2" maxlength="3000" autocomplete="off"
+        placeholder="Pega un enlace, sube una captura o escribe lo que te llegó"></textarea>
+      <div class="bar">
+        <input type="file" id="file" name="image" accept="image/jpeg,image/png,image/webp,image/gif" class="sr-only" tabindex="-1">
+        <button type="button" class="btn square" id="attach" aria-label="Adjuntar imagen" title="Adjuntar imagen (también puedes arrastrarla o pegarla)">{{ ui('image', 21) }}</button>
+        <span class="platforms"><span class="platforms-lead">Funciona con</span><span>YouTube</span><span>X</span><span>TikTok</span><span>Facebook</span><span>noticias</span></span>
+        <span class="attach-chip" id="chip"><span id="chip-name"></span><button type="button" id="chip-x" aria-label="Quitar imagen">×</button></span>
+        <button type="submit" class="btn primary" id="go">Verificar</button>
+      </div>
+    </form>
+    <p class="form-error" id="form-error" role="alert" hidden></p>
+    <p class="img-note" id="img-note" hidden>Leer una imagen tiene costo: si no contiene una noticia, rumor o afirmación para verificar, la verificación se descuenta igual.</p>
+    {% include "_quota.html" %}
+    {% set ex = news_example() %}
+    <button type="button" class="example-link" id="example" data-text="{{ ex }}" title="{{ ex }}">Probar con una noticia de hoy {{ ui('right', 16) }}</button>
+    <p class="example-hint">«{{ ex|truncate(90) }}»</p>
+
+    <section class="progress" id="progress" tabindex="-1" hidden aria-labelledby="progress-title">
+      <div class="prog-head"><h2 id="progress-title">Verificando</h2><span class="clock" id="clock" aria-label="Tiempo transcurrido">0:00</span></div>
+      <ol class="stages" id="stages" aria-label="Etapas">
+        <li class="stage"><span class="track"><span class="fill"></span></span>Leer</li>
+        <li class="stage"><span class="track"><span class="fill"></span></span>Separar</li>
+        <li class="stage"><span class="track"><span class="fill"></span></span>Buscar</li>
+        <li class="stage"><span class="track"><span class="fill"></span></span>Contrastar</li>
+      </ol>
+      <div class="now-line" aria-live="polite"><b id="now">Recibiendo el contenido</b><span id="eta">Calculando tiempo…</span></div>
+      <div class="found" id="found" hidden><p class="kicker">Afirmaciones a verificar</p><ol id="claims"></ol></div>
+      <p class="ticker" id="ticker" hidden></p>
+      <div class="found" id="srcbox" hidden>
+        <p class="kicker" id="counts"></p>
+        <ul class="tiles" id="tiles" aria-label="Fuentes"></ul>
+        <p class="legend"><span><span class="dot s-confirma"></span>Confirma</span><span><span class="dot s-contradice"></span>Contradice</span><span><span class="dot s-contexto"></span>Contexto</span></p>
+      </div>
+      <div class="error-box" id="job-error" hidden>
+        <p id="job-error-msg"></p>
+        <p><button type="button" class="btn" id="retry">Intentar otra vez</button></p>
+      </div>
+    </section>
+  </section>
+
+  {% if active %}
+  <section class="section" aria-labelledby="h-active">
+    <div class="section-head"><h2 id="h-active" class="title-icon"><span class="dot r-falso"></span>Rumores activos</h2><a class="link-more" href="/como-funciona#prioridad">Cómo se ordena</a></div>
+    <div class="rumors">
+      {% for row in active %}{{ cardx(row, plural(row.c24, 'consulta hoy', 'consultas hoy')) }}{% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <div class="home-grid">
+    <section class="section" aria-labelledby="h-recent">
+      <div class="section-head"><h2 id="h-recent">Recientes</h2><a class="link-more" href="/archivo">Archivo {{ ui('right', 16) }}</a></div>
+      <nav class="filters mb-m" aria-label="Filtrar por calificación">
+        {% for k, v in RATINGS.items() %}<a href="/archivo?calificacion={{ k }}"><span class="dot r-{{ k }}"></span>{{ v }}</a>{% endfor %}
+      </nav>
+      {% if recent %}<div class="grid-cards">{% for row in recent %}{{ cardx(row) }}{% endfor %}</div>
+      {% else %}<p class="empty">Todavía no hay verificaciones publicadas.</p>{% endif %}
+    </section>
+
+    <section class="section" aria-labelledby="h-today">
+      <div class="section-head">
+        <h2 id="h-today">Hoy</h2>
+        <div class="tabs" role="tablist" aria-label="Ordenar">
+          <button role="tab" id="tab-c" aria-controls="p-c" aria-selected="true">Más consultado</button>
+          <button role="tab" id="tab-v" aria-controls="p-v" aria-selected="false">Más visto</button>
+        </div>
+      </div>
+      <div id="p-c" role="tabpanel" aria-labelledby="tab-c">
+        {% if consulted %}<ol class="ranklist">{% for row in consulted %}<li><a href="{{ path_of(row) }}"><span class="n">{{ loop.index }}</span>{{ thumb(row) }}<span class="txt">{{ badge(row.rating) }}<span class="t">{{ row.title }}</span></span><span class="c" title="consultas hoy">{{ row.c24 }}</span></a></li>{% endfor %}</ol>
+        {% else %}<p class="empty">Aún no hay consultas hoy.</p>{% endif %}
+      </div>
+      <div id="p-v" role="tabpanel" aria-labelledby="tab-v">
+        {% if viewed %}<ol class="ranklist">{% for row in viewed %}<li><a href="{{ path_of(row) }}"><span class="n">{{ loop.index }}</span>{{ thumb(row) }}<span class="txt">{{ badge(row.rating) }}<span class="t">{{ row.title }}</span></span><span class="c" title="lecturas hoy">{{ row.v24 }}</span></a></li>{% endfor %}</ol>
+        {% else %}<p class="empty">Aún no hay lecturas hoy.</p>{% endif %}
+      </div>
+    </section>
+  </div>
+</div>
+{% endblock %}

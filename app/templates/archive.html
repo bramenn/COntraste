@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% from "_m.html" import cardx %}
+{% set nav = 'archivo' %}
+{% set noindex = q or page_num > 1 %}
+{% block title %}{% if topic %}{{ TOPICS[topic] }}: verificaciones{% elif rating %}{{ RATINGS[rating] }}: verificaciones{% else %}Archivo de verificaciones{% endif %} · Contraste{% endblock %}
+{% block head %}<link rel="canonical" href="{{ BASE }}/archivo{% if topic %}?tema={{ topic }}{% elif rating %}?calificacion={{ rating }}{% endif %}">{% endblock %}
+{% block main %}
+<div class="wrap">
+  <section class="section">
+    <h1>{% if topic %}{{ TOPICS[topic] }}{% elif rating %}{{ RATINGS[rating] }}{% else %}Archivo{% endif %}</h1>
+    <form class="search" action="/archivo" method="get" role="search">
+      <label for="aq" class="sr-only">Buscar en las verificaciones</label>
+      <input id="aq" type="search" name="q" value="{{ q }}" placeholder="Buscar: vacuna, Registraduría, salario…">
+      {% if rating %}<input type="hidden" name="calificacion" value="{{ rating }}">{% endif %}
+      {% if topic %}<input type="hidden" name="tema" value="{{ topic }}">{% endif %}
+      <button class="btn primary" type="submit">Buscar</button>
+    </form>
+    {% set qq = '/archivo?q=' ~ (q|urlencode) %}
+    {% set keep_topic = qq ~ ('&tema=' ~ topic if topic else '') %}
+    {% set keep_rating = qq ~ ('&calificacion=' ~ rating if rating else '') %}
+    <nav class="filters mb-m" aria-label="Filtrar por calificación">
+      <a href="{{ keep_topic }}" {% if not rating %}aria-current="true"{% endif %}>Todas</a>
+      {% for k, v in RATINGS.items() %}<a href="{{ keep_topic }}{{ '&calificacion=' ~ k if rating != k else '' }}" {% if rating == k %}aria-current="true" title="Quitar este filtro"{% endif %}><span class="dot r-{{ k }}"></span>{{ v }}</a>{% endfor %}
+    </nav>
+    <nav class="filters mb-m" aria-label="Filtrar por tema">
+      <a href="{{ keep_rating }}" {% if not topic %}aria-current="true"{% endif %}>Todos los temas</a>
+      {% set shown = topics_in_use() %}{% if topic and topic not in shown|map('first')|list %}{% set shown = shown + [(topic, TOPICS[topic])] %}{% endif %}
+      {% for k, v in shown %}<a href="{{ keep_rating }}{{ '&tema=' ~ k if topic != k else '' }}" {% if topic == k %}aria-current="true" title="Quitar este filtro"{% endif %}>{{ v }}</a>{% endfor %}
+    </nav>
+    {% if rows %}<div class="grid-cards wide">{% for row in rows %}{{ cardx(row, TOPICS[row.topic] ~ ' · ' ~ format_date(row.created_at)) }}{% endfor %}</div>
+    {% else %}<p class="empty">No hay verificaciones publicadas con esos filtros.</p>{% endif %}
+    <nav class="pager" aria-label="Páginas">
+      {% if page_num > 1 %}<a href="/archivo?pagina={{ page_num - 1 }}&amp;q={{ q|urlencode }}{% if rating %}&amp;calificacion={{ rating }}{% endif %}{% if topic %}&amp;tema={{ topic }}{% endif %}" rel="prev">← Más recientes</a>{% else %}<span></span>{% endif %}
+      {% if more %}<a href="/archivo?pagina={{ page_num + 1 }}&amp;q={{ q|urlencode }}{% if rating %}&amp;calificacion={{ rating }}{% endif %}{% if topic %}&amp;tema={{ topic }}{% endif %}" rel="next">Anteriores →</a>{% endif %}
+    </nav>
+  </section>
+</div>
+{% endblock %}

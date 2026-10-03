@@ -1,0 +1,37 @@
+# Disposable email domains. Accounts on these domains can sign in and buy credits,
+# but never get the free monthly credits. One domain per line; edit and restart.
+10minutemail.com
+20minutemail.com
+burnermail.io
+discard.email
+dispostable.com
+emailondeck.com
+fakeinbox.com
+getairmail.com
+getnada.com
+guerrillamail.com
+guerrillamail.net
+guerrillamailblock.com
+harakirimail.com
+mailcatch.com
+maildrop.cc
+mailinator.com
+mailnesia.com
+mailpoof.com
+mintemail.com
+mohmal.com
+moakt.com
+mytemp.email
+sharklasers.com
+spamgourmet.com
+temp-mail.io
+temp-mail.org
+tempail.com
+tempmail.com
+tempmailo.com
+tempr.email
+throwawaymail.com
+trashmail.com
+trashmail.de
+yopmail.com
+yopmail.fr

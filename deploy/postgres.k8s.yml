@@ -1,0 +1,81 @@
+# Contraste's own PostgreSQL, next to the app (the managed database was in Miami while the cluster is in
+# France: ~121 ms per query, 1-3 s per page). The app still connects through pgbouncer.
+# Secret postgres-admin (POSTGRES_PASSWORD for the "postgres" superuser) is created out of band. The app
+# role contraste_app is not a superuser and owns the "contraste" database.
+# local-path ties the volume to one node: if that node is lost, restore from the Velero backup below.
+# Backups: Velero copies the volume to S3 every 6 h, and right before each copy a hook writes a
+# consistent pg_dump into the same volume (dump/contraste.dump), which is the file to restore from.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-data
+  namespace: contraste
+spec:
+  accessModes: [ReadWriteOnce]
+  storageClassName: local-path
+  resources:
+    requests: {storage: 5Gi}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  namespace: contraste
+  labels: {app: contraste, component: postgres}
+spec:
+  replicas: 1
+  strategy: {type: Recreate}
+  selector:
+    matchLabels: {app: contraste, component: postgres}
+  template:
+    metadata:
+      labels: {app: contraste, component: postgres}
+      annotations:
+        pre.hook.backup.velero.io/container: postgres
+        pre.hook.backup.velero.io/command: '["/bin/sh", "-c", "mkdir -p /var/lib/postgresql/dump && pg_dump -U postgres -d contraste -Fc -f /var/lib/postgresql/dump/contraste.dump.tmp && mv /var/lib/postgresql/dump/contraste.dump.tmp /var/lib/postgresql/dump/contraste.dump"]'
+        pre.hook.backup.velero.io/timeout: 3m
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:18-alpine
+        env:
+        - {name: PGDATA, value: /var/lib/postgresql/pgdata}
+        envFrom:
+        - secretRef: {name: postgres-admin}
+        ports: [{containerPort: 5432, name: postgres}]
+        readinessProbe:
+          exec: {command: [pg_isready, -U, postgres]}
+          periodSeconds: 5
+        livenessProbe:
+          exec: {command: [pg_isready, -U, postgres]}
+          periodSeconds: 20
+          failureThreshold: 6
+        resources:
+          requests: {cpu: 100m, memory: 256Mi}
+          limits: {cpu: "1", memory: 1Gi}
+        volumeMounts:
+        - {name: data, mountPath: /var/lib/postgresql}
+      volumes:
+      - name: data
+        persistentVolumeClaim: {claimName: postgres-data}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: contraste
+spec:
+  selector: {app: contraste, component: postgres}
+  ports: [{port: 5432, targetPort: 5432}]
+---
+apiVersion: velero.io/v1
+kind: Schedule
+metadata:
+  name: contraste-6h
+  namespace: velero
+spec:
+  schedule: "0 */6 * * *"
+  template:
+    includedNamespaces: [contraste]
+    defaultVolumesToFsBackup: true
+    ttl: 336h0m0s

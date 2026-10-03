@@ -1,0 +1,173 @@
+# Source trust tiers. Edit this file and restart the container.
+# Matching is by domain: "afp.com" also covers "www.afp.com"; when two entries match, the most specific wins
+# (that is why factual.afp.com is tier 2 even though afp.com is tier 3).
+# Any domain not listed here is tier 4 (weighs less). Search covers the whole world.
+
+tier_1:  # Official data and public bodies
+  # Colombia
+  dane.gov.co: DANE
+  banrep.gov.co: Banco de la República
+  registraduria.gov.co: Registraduría
+  cne.gov.co: Consejo Nacional Electoral
+  presidencia.gov.co: Presidencia
+  secop.gov.co: SECOP
+  colombiacompra.gov.co: Colombia Compra Eficiente
+  secretariasenado.gov.co: Senado (Secretaría)
+  senado.gov.co: Senado
+  camara.gov.co: Cámara de Representantes
+  imprenta.gov.co: Imprenta Nacional (Gaceta y Diario Oficial)
+  corteconstitucional.gov.co: Corte Constitucional
+  cortesuprema.gov.co: Corte Suprema
+  consejodeestado.gov.co: Consejo de Estado
+  procuraduria.gov.co: Procuraduría
+  contraloria.gov.co: Contraloría
+  fiscalia.gov.co: Fiscalía
+  medicinalegal.gov.co: Medicina Legal
+  minsalud.gov.co: Minsalud
+  ins.gov.co: Instituto Nacional de Salud
+  mindefensa.gov.co: Mindefensa
+  fac.mil.co: Fuerza Aeroespacial
+  ejercito.mil.co: Ejército
+  policia.gov.co: Policía Nacional
+  datos.gov.co: Datos Abiertos Colombia
+  # International
+  worldbank.org: Banco Mundial
+  imf.org: FMI
+  oecd.org: OCDE
+  un.org: Naciones Unidas
+  cepal.org: CEPAL
+  who.int: OMS
+  paho.org: OPS
+  unicef.org: UNICEF
+  unodc.org: UNODC
+  unhcr.org: ACNUR
+  acnur.org: ACNUR
+  iom.int: OIM
+  ohchr.org: ONU Derechos Humanos
+  hchr.org.co: ONU Derechos Humanos Colombia
+  ilo.org: OIT
+  fao.org: FAO
+  reliefweb.int: ReliefWeb (ONU)
+  europa.eu: Unión Europea
+  cdc.gov: CDC (EE. UU.)
+
+tier_2:  # Fact-checkers (Colombia and IFCN signatories) and research data
+  colombiacheck.com: Colombiacheck
+  lasillavacia.com: La Silla Vacía
+  factual.afp.com: AFP Factual
+  flip.org.co: FLIP
+  maldita.es: Maldita.es
+  newtral.es: Newtral
+  chequeado.com: Chequeado
+  fullfact.org: Full Fact
+  politifact.com: PolitiFact
+  factcheck.org: FactCheck.org
+  snopes.com: Snopes
+  aosfatos.org: Aos Fatos
+  lupa.news: Agência Lupa
+  ecuadorchequea.com: Ecuador Chequea
+  boliviaverifica.bo: Bolivia Verifica
+  verificado.com.mx: Verificado
+  cotejo.info: Cotejo.info
+  fastcheck.cl: Fast Check
+  factchequeado.com: Factchequeado
+  africacheck.org: Africa Check
+  leadstories.com: Lead Stories
+  healthfeedback.org: Health Feedback
+  sciencefeedback.co: Science Feedback
+  ourworldindata.org: Our World in Data
+
+tier_3:  # News outlets
+  # Colombia
+  elespectador.com: El Espectador
+  eltiempo.com: El Tiempo
+  semana.com: Semana
+  cambiocolombia.com: Cambio
+  elcolombiano.com: El Colombiano
+  elpais.com.co: El País (Cali)
+  elheraldo.co: El Heraldo
+  infobae.com: Infobae
+  noticiascaracol.com: Noticias Caracol
+  caracol.com.co: Caracol Radio
+  noticiasrcn.com: Noticias RCN
+  rcnradio.com: RCN Radio
+  lafm.com.co: La FM
+  ntn24.com: NTN24
+  bluradio.com: Blu Radio
+  wradio.com.co: W Radio
+  rtvcnoticias.com: RTVC Noticias
+  razonpublica.com: Razón Pública
+  voragine.co: Vorágine
+  cuestionpublica.com: Cuestión Pública
+  # Wire services and international
+  reuters.com: Reuters
+  apnews.com: AP
+  efe.com: EFE
+  afp.com: AFP
+  bbc.com: BBC
+  elpais.com: El País (España)
+  dw.com: DW
+  france24.com: France 24
+  nytimes.com: The New York Times
+  washingtonpost.com: The Washington Post
+  theguardian.com: The Guardian
+  lemonde.fr: Le Monde
+  aljazeera.com: Al Jazeera
+  npr.org: NPR
+  cnn.com: CNN
+  elmundo.es: El Mundo (España)
+  lanacion.com.ar: La Nación (Argentina)
+  clarin.com: Clarín
+  eluniversal.com.mx: El Universal (México)
+  elcomercio.pe: El Comercio (Perú)
+  bloomberg.com: Bloomberg
+  ft.com: Financial Times
+  economist.com: The Economist
+
+# Owners: two outlets from the same group do NOT count as independent sources, and when more than half
+# of a claim's sources belong to one group the rating is capped.
+# A domain not listed here counts as its own group.
+# Keep this list up to date: media ownership changes. Last reviewed: 2026-09.
+owner_groups:
+  Grupo Valorem (Santo Domingo): [elespectador.com, bluradio.com, noticiascaracol.com, caracoltv.com]
+  Organización Ardila Lülle: [noticiasrcn.com, rcnradio.com, lafm.com.co, ntn24.com, canalrcn.com]
+  Casa Editorial El Tiempo (Sarmiento Angulo): [eltiempo.com, portafolio.co, citytv.eltiempo.com]
+  Grupo Gilinski: [semana.com]
+  PRISA: [caracol.com.co, wradio.com.co, elpais.com]
+  Gobierno nacional de Colombia (Ejecutivo): [presidencia.gov.co, minsalud.gov.co, mindefensa.gov.co, fac.mil.co, ejercito.mil.co, policia.gov.co, rtvcnoticias.com]
+  Agencia EFE (Estado español): [efe.com]
+  AFP: [afp.com, factual.afp.com]
+  # To confirm (owners that changed or are unclear; fill them in if you know them):
+  # El Colombiano, El País (Cali), El Heraldo, Cambio, Publimetro.
+
+# Never count as evidence: social networks and forums.
+# Tertiary sources: anyone can edit them, or a machine writes them. They never count as evidence, but the
+# references they cite are followed to reach the original sources.
+leads_only:
+  - wikipedia.org
+  - wikiwand.com
+  - grokipedia.com
+  - everipedia.org
+  - fandom.com
+  - infogalactic.com
+
+excluded:
+  - facebook.com
+  - fb.watch
+  - instagram.com
+  - x.com
+  - twitter.com
+  - tiktok.com
+  - youtube.com
+  - youtu.be
+  - threads.net
+  - whatsapp.com
+  - t.me
+  - telegram.org
+  - reddit.com
+  - kwai.com
+  - linkedin.com
+  - pinterest.com
+  - quora.com
+  - forocoches.com
+  - taringa.net

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Encuesta · Contraste{% endblock %}
+{% macro checked(name, value, multi=False) %}{% if form and ((multi and value in form.getlist(name)) or (not multi and form.get(name) == value)) %}checked{% endif %}{% endmacro %}
+{% block main %}
+<div class="wrap narrow"><section class="section stack survey">
+{% if thanks or done %}
+  <h1>¡Gracias!</h1>
+  <p>Tus respuestas nos ayudan a decidir qué mejorar primero y cómo mantener Contraste.{% if thanks and reward %} Te sumamos {{ reward }} verificaciones gratis para este mes.{% endif %}</p>
+  <p><a class="btn primary" href="/">Seguir verificando</a> <a class="btn" href="/cuenta">Tu cuenta</a></p>
+{% else %}
+  <h1>Ayúdanos a mejorar Contraste</h1>
+  {% if no_credits %}<p class="note warn">Usaste tus verificaciones gratis de este mes.{% if reward %} Responde esta encuesta y te damos {{ reward }} más ahora mismo.{% endif %}</p>
+  {% elif reward %}<p class="note">Es 1 minuto. Como agradecimiento te damos {{ reward }} verificaciones gratis.</p>{% endif %}
+  <p class="muted">Las respuestas son anónimas en los resultados y nunca se publican con tu correo.</p>
+  {% if error %}<p class="form-error" role="alert">{{ error }}</p>{% endif %}
+  <form method="post" action="/encuesta" class="stack">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <fieldset><legend>1. ¿Cómo te sentirías si mañana ya no pudieras usar Contraste?</legend>
+      {% for k, v in PMF.items() %}<label class="opt"><input type="radio" name="pmf" value="{{ k }}" required {{ checked('pmf', k) }}> {{ v }}</label>{% endfor %}</fieldset>
+    <fieldset><legend>2. ¿Para qué lo usas? <span class="muted">Elige las que apliquen.</span></legend>
+      {% for k, v in USES.items() %}<label class="opt"><input type="checkbox" name="uses" value="{{ k }}" {{ checked('uses', k, True) }}> {{ v }}</label>{% endfor %}</fieldset>
+    <fieldset><legend>3. ¿Qué es lo que más te sirve? <span class="muted">Opcional.</span></legend>
+      <textarea name="benefit" maxlength="500" rows="2" aria-label="Lo que más te sirve">{{ form.get('benefit', '') if form }}</textarea></fieldset>
+    <fieldset><legend>4. ¿Qué deberíamos mejorar primero? <span class="muted">Hasta 2.</span></legend>
+      {% for k, v in IMPROVE.items() %}<label class="opt"><input type="checkbox" name="improve" value="{{ k }}" {{ checked('improve', k, True) }}> {{ v }}</label>{% endfor %}
+      <textarea name="improve_text" maxlength="500" rows="2" placeholder="Cuéntanos más (opcional)" aria-label="Qué mejorar, en tus palabras">{{ form.get('improve_text', '') if form }}</textarea></fieldset>
+    <p><button class="btn primary" type="submit">Enviar respuestas</button></p>
+  </form>
+{% endif %}
+</section></div>
+{% endblock %}

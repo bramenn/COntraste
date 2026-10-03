@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+{% from "_m.html" import ui, badge, mark, thumb, plural, STANCE, TIER %}
+{% set label = RATINGS[r.rating] %}
+{% set div = r.diversity or {} %}
+{% block title %}{{ label }}: {{ r.title }} · Contraste{% endblock %}
+{% block description %}{{ label }}. {{ r.headline|truncate(150) }}{% endblock %}
+{% block head %}
+<link rel="canonical" href="{{ BASE }}{{ path }}">
+<meta property="og:type" content="article">
+<meta property="og:locale" content="es_CO">
+<meta property="article:published_time" content="{{ row.created_at }}">
+<meta property="article:modified_time" content="{{ row.updated_at }}">
+<meta property="article:section" content="{{ TOPICS[row.topic] }}">
+<meta property="og:site_name" content="Contraste">
+<meta property="og:title" content="{{ label|upper }}: {{ r.title }}">
+<meta property="og:description" content="{{ r.headline }}">
+<meta property="og:url" content="{{ BASE }}{{ path }}">
+{% if not r.private_person %}
+<meta property="og:image" content="{{ BASE }}/api/cards/{{ row.id }}/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Calificación: {{ label }}. {{ r.circulating }}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="{{ BASE }}/api/cards/{{ row.id }}/og.png">
+{% endif %}
+{% if claim_review %}<script type="application/ld+json">{{ claim_review|safe }}</script>{% endif %}
+{% endblock %}
+{% block main %}
+<article class="wrap" id="article" data-id="{{ row.id }}" data-url="{{ BASE }}{{ path }}" data-title="{{ label }}: {{ r.title }}">
+  {% if row.status == 'unlisted' %}<p class="note mt-s">No aparece en portada ni en buscadores. Motivo: {{ row.unlisted_reason }}</p>{% endif %}
+  {% if row.demo %}<p class="note mt-s">Caso cargado para demostración.</p>{% endif %}
+
+  <nav class="crumbs" aria-label="Ruta"><a href="/">Inicio</a><span aria-hidden="true">›</span><a href="/archivo?tema={{ row.topic }}">{{ TOPICS[row.topic] }}</a></nav>
+  <div class="article-top">
+    {% if r.private_person %}
+    <section class="share-card" aria-label="Sin tarjeta para compartir"><p class="note">No hacemos tarjeta para compartir: esta verificación trata sobre una persona que no es figura pública.</p></section>
+    {% else %}
+    <section class="share-card" id="share" aria-label="Tarjeta para compartir">
+      {% if row.status != 'listed' %}<p class="note warn">Verificación preliminar: {{ row.unlisted_reason or 'no está en portada' }} La tarjeta lo dice.</p>{% endif %}
+      <img id="card-img" src="{{ card_url(row, 'post') }}" width="1080" height="1350" decoding="async" fetchpriority="high" alt="Tarjeta: {{ label }}. Lo que circula: {{ r.circulating }}">
+      <div class="fmt-row">
+        <fieldset class="seg" aria-label="Formato de la tarjeta">
+          <label><input type="radio" name="fmt" value="post" checked><span>4:5</span></label>
+          <label><input type="radio" name="fmt" value="story"><span>9:16</span></label>
+        </fieldset>
+        <span>Publicación · Historia</span>
+      </div>
+      <button type="button" class="btn primary share-main" id="share-native" hidden>{{ ui('share', 20) }}Compartir</button>
+      <div class="share-icons">
+        <a class="btn" id="download" href="/api/cards/{{ row.id }}/post.png" download="contraste-{{ row.id }}-publicacion.png" aria-label="Descargar imagen" title="Descargar imagen">{{ ui('download', 21) }}</a>
+        <a class="btn" href="https://wa.me/?text={{ (label ~ ': ' ~ r.title ~ ' ' ~ BASE ~ path)|urlencode }}" target="_blank" rel="noopener" aria-label="Compartir en WhatsApp" title="WhatsApp">{{ ui('whatsapp', 21) }}</a>
+        <a class="btn" href="https://twitter.com/intent/tweet?text={{ (label ~ ': ' ~ r.title)|urlencode }}&amp;url={{ (BASE ~ path)|urlencode }}" target="_blank" rel="noopener" aria-label="Compartir en X" title="X">{{ ui('x', 19) }}</a>
+        <a class="btn" href="https://www.facebook.com/sharer/sharer.php?u={{ (BASE ~ path)|urlencode }}" target="_blank" rel="noopener" aria-label="Compartir en Facebook" title="Facebook">{{ ui('facebook', 21) }}</a>
+        <button type="button" class="btn" id="copy" aria-label="Copiar enlace" title="Copiar enlace">{{ ui('link', 21) }}</button>
+      </div>
+      <p class="muted" id="copy-status" role="status"></p>
+    </section>
+    {% endif %}
+
+    <div class="article-main">
+      <header class="verdict-head">
+        {{ badge(r.rating, lg=True) }}
+        <h1>{{ r.title }}</h1>
+        <p class="verdict">{{ r.headline }}</p>
+        <p class="meta-row">
+          <span>{{ ui('calendar', 15) }}<time datetime="{{ row.created_at }}">{{ format_date(row.created_at) }}</time></span>
+          {% if row.updated_at[:10] != row.created_at[:10] %}<span>Actualizado {{ format_date(row.updated_at) }}</span>{% endif %}
+          <span>{{ ui('trend', 15) }}{{ plural(consults, 'consulta', 'consultas') }}</span>
+          <span>{{ plural(r.sources|length, 'fuente', 'fuentes') }}</span>
+          <span>{% if row.human_reviewed_at %}Revisada por el equipo el {{ format_date(row.human_reviewed_at) }}{% else %}Verificación automatizada con reglas fijas{% endif %}</span>
+        </p>
+      </header>
+
+      <section class="block" aria-labelledby="h-circula">
+        <h2 id="h-circula">Qué se dice</h2>
+        <p class="circula">“{{ r.circulating }}”</p>
+        {% if (r.claims|length + r.not_verifiable|length) > 1 %}
+        <ol class="glance" aria-label="Resumen de lo verificado">
+          {% for c in r.claims %}<li><a href="#punto-{{ loop.index }}">{{ mark(c.rating) }}<span><b>{{ c.short }}</b><span class="rl">{{ RATINGS[c.rating] }}{% if c.central and r.claims|length > 1 %} · lo central{% endif %}</span></span></a></li>{% endfor %}
+          {% for n in r.not_verifiable %}<li><a href="#nv-{{ loop.index }}">{{ mark('no_verificable') }}<span><b>{{ n.text|truncate(70) }}</b><span class="rl">No se califica</span></span></a></li>{% endfor %}
+        </ol>
+        {% endif %}
+        {% if r.media.thumb or r.media.original_url %}
+        <div class="media">
+          {% if r.media.thumb %}<img src="/media/{{ r.media.thumb }}" alt="Miniatura del contenido original con el sello {{ label }} y rostros difuminados">{% endif %}
+          {% if r.media.original_url %}<p>Original: <a href="{{ r.media.original_url }}" rel="nofollow noopener ugc" target="_blank">{{ r.media.original_url|truncate(48) }}</a><br>No lo volvemos a publicar para no amplificarlo.</p>{% endif %}
+        </div>
+        {% endif %}
+        {% if r.media.transcript %}<details class="plain mt-s"><summary>Ver la transcripción</summary><div class="transcript">{{ r.media.transcript }}</div></details>{% endif %}
+      </section>
+
+      <section class="block" aria-labelledby="h-found">
+        <h2 id="h-found">Qué se verificó</h2>
+        {% for c in r.claims %}
+        {% set ind = c.evidence|rejectattr('party')|list %}
+        {% set parties = c.evidence|selectattr('party')|list %}
+        <article class="check" id="punto-{{ loop.index }}">
+          <header>{{ badge(c.rating) }}{% if c.central and r.claims|length > 1 %}<span class="central-tag">Lo central</span>{% endif %}{% if r.claims|length > 1 %}<span class="num">{{ loop.index }} de {{ r.claims|length }}</span>{% endif %}</header>
+          <dl>
+            <div><dt>Se dice</dt><dd class="said">“{{ c.text }}”</dd></div>
+            <div><dt>Encontramos</dt><dd>{{ c.explanation }}</dd></div>
+            {% if c.adjusted %}<div class="adj"><dt>Por qué se ajustó</dt><dd>Se propuso «{{ RATINGS[c.proposed] }}».{% if c.adjusted != c.explanation %} {{ c.adjusted }}{% endif %}</dd></div>{% endif %}
+            <div><dt>Evidencia</dt><dd>
+              {% if c.evidence %}
+              <p class="tally">
+                {% for k, one, many in (('confirma','confirma','confirman'), ('contradice','contradice','contradicen'), ('contexto','aporta contexto','aportan contexto')) %}{% set n = ind|selectattr('stance','equalto',k)|list|length %}{% if n %}<span><span class="dot s-{{ k }}"></span>{{ n }} {{ one if n == 1 else many }}</span>{% endif %}{% endfor %}
+                {% if parties %}<span>{{ parties|length }} de parte</span>{% endif %}
+              </p>
+              <div class="chips">{% for e in c.evidence|sort(attribute='stance', reverse=True) %}{% set s = r.sources[e.source] %}<a href="#fuente-{{ e.source }}"><span class="dot s-{{ e.stance if e.stance in ('confirma','contradice') else 'contexto' }}"></span>{{ s.name }}{% if e.stance == 'contradice' and s.date %} ({{ s.date }}){% endif %}{% if e.party %} · de parte{% endif %}</a>{% endfor %}</div>
+              {% else %}<p class="muted">Ninguna fuente válida habló de esto.</p>{% endif %}
+            </dd></div>
+          </dl>
+        </article>
+        {% endfor %}
+        {% for n in r.not_verifiable %}
+        <article class="check" id="nv-{{ loop.index }}">
+          <header>{{ badge('no_verificable') }}</header>
+          <dl>
+            <div><dt>Se dice</dt><dd class="said">“{{ n.text }}”</dd></div>
+            <div><dt>Por qué no se califica</dt><dd>{{ n.note or {'opinion':'Es opinión.','satira':'Es sátira.','prediccion':'Es una predicción.'}.get(n.kind, '') }}</dd></div>
+          </dl>
+        </article>
+        {% endfor %}
+        {% if not r.claims and not r.not_verifiable %}<p class="empty">No encontramos afirmaciones verificables.</p>{% endif %}
+      </section>
+
+      {% if r.timeline %}
+      <section class="block" aria-labelledby="h-time">
+        <h2 id="h-time">Cronología</h2>
+        <ol class="timeline">{% for t in r.timeline %}<li><b>{{ t.date }}</b><span>{{ t.event }}</span>
+          {% if t.sources %}<span class="refs">{% for i in t.sources if i < r.sources|length %}<a href="#fuente-{{ i }}">{{ r.sources[i].name }}</a>{% endfor %}</span>{% endif %}</li>{% endfor %}</ol>
+      </section>
+      {% endif %}
+
+      <section class="block" aria-labelledby="h-src">
+        <div class="src-head"><h2 id="h-src">{{ plural(r.sources|length, 'fuente', 'fuentes') }}</h2>{% if r.omitted %}<span class="muted">{{ plural(r.omitted|length, 'omitida', 'omitidas') }}</span>{% endif %}</div>
+        {% if r.sources %}
+        {% set order = {'contradice': 0, 'confirma': 1, 'contexto': 2} %}
+        <div class="stance-bar" role="img" aria-label="{% for k in ('confirma','contradice','contexto') %}{{ STANCE[k] }}: {{ r.sources|selectattr('stance','equalto',k)|list|length }}. {% endfor %}">
+          {% for s in r.sources|sort(attribute='stance') %}<span class="s-{{ s.stance if s.stance in ('confirma','contradice') else 'contexto' }}"></span>{% endfor %}
+        </div>
+        <p class="legend">{% for k in ('confirma','contradice','contexto') %}<span><span class="dot s-{{ k }}"></span>{{ STANCE[k] }} {{ r.sources|selectattr('stance','equalto',k)|list|length }}</span>{% endfor %}</p>
+        {% if div %}
+        <p class="diversity">
+          <span>{{ ui('owners', 16) }}{{ plural(div.groups, 'dueño distinto', 'dueños distintos') }}</span>
+          {% if div.data %}<span>{{ ui('data', 16) }}{{ plural(div.data, 'consulta de datos abiertos', 'consultas de datos abiertos') }}</span>{% endif %}
+          {% if div.primary %}<span>{{ plural(div.primary, 'documento o dato primario', 'documentos o datos primarios') }}</span>{% endif %}
+          {% if div.party %}<span>{{ plural(div.party, 'versión de parte', 'versiones de parte') }}</span>{% endif %}
+        </p>
+        {% if div.concentrated %}<p class="note warn mt-s">{{ div.concentrated[1] }} de {{ div.concentrated[2] }} fuentes son del mismo dueño: {{ div.concentrated[0] }}.</p>{% endif %}
+        {% endif %}
+        <ol class="sources">{% for s in r.sources %}
+          <li class="src" id="fuente-{{ loop.index0 }}">
+            <p class="top"><b>{{ s.name }}</b><span class="tier"><span class="dot s-{{ s.stance if s.stance in ('confirma','contradice') else 'contexto' }}"></span>{{ 'Datos abiertos' if s.kind == 'datos' else TIER[s.tier] }}{% if s.kind == 'documento' %} · Documento{% endif %}</span></p>
+            <a class="ttl" href="{{ s.url }}" rel="noopener" target="_blank">{{ s.title or s.url }}</a>
+            {% if (s.group and s.group != s.domain) or s.party %}<p class="sub">{% if s.group and s.group != s.domain %}Dueño: {{ s.group }}{% endif %}{% if s.party %}{{ ' · ' if s.group and s.group != s.domain }}Versión de parte: no cuenta como confirmación{% endif %}</p>{% endif %}
+            {% if s.via %}<p class="sub">Encontrada siguiendo lo que cita {{ s.via }}</p>
+            {% elif s.memory %}<p class="sub">Fuente que ya habíamos leído en otra verificación; la volvimos a consultar hoy</p>{% endif %}
+            <details><summary>Resumen</summary><p>{{ s.summary }}</p></details>
+          </li>{% endfor %}
+        </ol>
+        {% else %}<p class="empty">Ninguna fuente cumplió las reglas de evidencia.</p>{% endif %}
+        {% if r.omitted %}
+        <details class="omitted"><summary>Fuentes omitidas ({{ r.omitted|length }})</summary>
+          <ul>{% for o in r.omitted %}<li>{{ o.name }}: {{ o.reason }}</li>{% endfor %}</ul>
+        </details>
+        {% endif %}
+      </section>
+
+      {% if r.notes %}<section class="block stack" aria-label="Notas">{% for n in r.notes %}<p class="note">{{ n }}</p>{% endfor %}</section>{% endif %}
+
+      {% if changes %}
+      <section class="block" aria-labelledby="h-changes">
+        <h2 id="h-changes">Historial de cambios</h2>
+        <ul class="changes">{% for c in changes %}
+          <li><strong>{{ {'correccion': 'Corrección', 'revision': 'Revisada'}.get(c.kind, 'Actualizado') }} el {{ format_date(c.at) }}:</strong> {{ c.note }}{% if c.old_rating != c.new_rating %} <span class="muted">({{ RATINGS[c.old_rating] }} → {{ RATINGS[c.new_rating] }})</span>{% endif %}</li>
+        {% endfor %}</ul>
+      </section>
+      {% endif %}
+
+      <section class="facts" aria-label="Datos de la revisión">
+        <div class="nums">
+          <div><b>{{ r.sources|length }}</b><span>fuentes</span></div>
+          <div><b>{{ div.groups if div else '—' }}</b><span>dueños distintos</span></div>
+          <div><b>{{ consults }}</b><span>consultas</span></div>
+        </div>
+        <p class="muted">Revisado el {{ format_date(r.reviewed_at or row.created_at) }} · {{ plural(views, 'lectura', 'lecturas') }}</p>
+        <a class="link-more" href="/como-funciona">Cómo lo revisamos {{ ui('right', 16) }}</a>
+      </section>
+
+      {% if related %}
+      <section class="block related" aria-labelledby="h-related">
+        <h2 id="h-related">Relacionadas</h2>
+        {% for rel in related %}<a href="{{ path_of(rel) }}">{{ thumb(rel) }}<span class="txt">{{ badge(rel.rating) }}<span class="t">{{ rel.title }}</span></span></a>{% endfor %}
+      </section>
+      {% endif %}
+
+      {% if r.method %}
+      <section class="block" aria-labelledby="h-method">
+        <details class="plain"><summary><h2 id="h-method">Cómo lo buscamos</h2></summary>
+          <p class="muted">Para que puedas repetir la investigación. Buscamos el {{ format_date(r.reviewed_at) }} con estas consultas:</p>
+          <ul>{% for q in r.method.queries %}<li><code>{{ q }}</code></li>{% endfor %}</ul>
+          {% if r.method.followed %}<p class="muted">Además seguimos {{ plural(r.method.followed, 'documento o fuente citada', 'documentos o fuentes citadas') }} dentro de las fuentes.</p>{% endif %}
+          {% if r.method.recalled %}<p class="muted">{{ plural(r.method.recalled, 'fuente salió', 'fuentes salieron') }} de lo que ya habíamos leído antes, y {{ 'la' if r.method.recalled == 1 else 'las' }} volvimos a consultar.</p>{% endif %}
+        </details>
+      </section>
+      {% endif %}
+
+      <section class="block" id="replica" aria-labelledby="h-reply">
+        <details class="plain"><summary><h2 id="h-reply">¿Esta verificación habla de ti o de tu organización?</h2></summary>
+          <form class="stack contrib-form" method="post" action="/v/{{ row.id }}/replica">
+            <p class="muted">Tienes derecho a responder. Lo lee una persona del equipo; si cambia algo, lo corregimos y queda en el historial. Tu correo solo se usa para contestarte y se borra al cerrar el caso.</p>
+            <label>Nombre o entidad <input name="name" required maxlength="160"></label>
+            <label>Correo para responderte <input type="email" name="email" required maxlength="254"></label>
+            <label>Tu respuesta <textarea name="message" required maxlength="2000" rows="4"></textarea></label>
+            <label>Enlace a un documento que la respalde (opcional) <input type="url" name="url" maxlength="2000"></label>
+            <label class="opt"><input type="checkbox" name="consent" value="1" required> Acepto la <a href="/privacidad">política de tratamiento de datos</a>.</label>
+            <button class="btn" type="submit">Enviar respuesta</button>
+          </form>
+        </details>
+      </section>
+
+      {% if r.claims %}
+      <section class="block contribute" id="aportar" aria-labelledby="h-contribute">
+        <details class="plain">
+          <summary><h2 id="h-contribute">¿Tienes una fuente que cambie esta verificación?</h2></summary>
+          {% if reviewed_n %}<p class="muted">Esta verificación se ha revisado {{ plural(reviewed_n, 'vez', 'veces') }} con evidencia aportada.</p>{% endif %}
+          <form class="stack contrib-form" id="contrib" data-article="{{ row.id }}">
+            <p class="muted">Envía de 1 a 3 enlaces a la fuente original (medio, documento o dato oficial; no redes sociales). La volvemos a investigar con las mismas reglas: la fuente tiene que decirlo textualmente, y una sola fuente no basta para calificar algo como verdadero o falso. Usa 1 de tus verificaciones; si se acepta te la devolvemos y te damos una extra.</p>
+            {% include "_quota.html" %}
+            <label>Afirmación
+              <select name="claim" required>{% for c in r.claims %}<option value="{{ loop.index0 }}">{{ c.short or c.text }}</option>{% endfor %}</select></label>
+            <label>Enlace <input type="url" name="url" required maxlength="2000" placeholder="https://"></label>
+            <label>Otro enlace (opcional) <input type="url" name="url" maxlength="2000"></label>
+            <label>Otro enlace (opcional) <input type="url" name="url" maxlength="2000"></label>
+            <label>Nota para el equipo (opcional, no se publica) <textarea name="note" maxlength="500" rows="3"></textarea></label>
+            <button class="btn primary" type="submit">Enviar aporte</button>
+            <p class="form-error" role="alert" hidden></p>
+          </form>
+        </details>
+      </section>
+      {% endif %}
+    </div>
+  </div>
+</article>
+{% endblock %}

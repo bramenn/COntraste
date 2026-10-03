@@ -1,0 +1,42 @@
+name: Verificación incorrecta
+description: Una verificación publicada llegó a una conclusión equivocada o le falta algo importante.
+title: "[Verificación] "
+labels: ["verificación"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Gracias por revisar. Muchas reglas de Contraste nacieron de reportes como este.
+        No incluyas datos personales de nadie (teléfonos, direcciones, documentos).
+  - type: input
+    id: url
+    attributes:
+      label: Enlace a la verificación
+      placeholder: https://contraste.bramen.org/v/...
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: ¿Qué está mal?
+      options:
+        - La calificación general no corresponde a la evidencia
+        - Una afirmación quedó mal calificada
+        - Se verificó algo secundario y no lo central
+        - Faltan fuentes importantes o hay fuentes que no corresponden
+        - Se leyó mal el contenido (imagen, video o texto)
+        - Fechas mal interpretadas
+        - Otra cosa
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: Explica qué está mal y qué debería decir
+    validations:
+      required: true
+  - type: textarea
+    id: sources
+    attributes:
+      label: Fuentes que lo muestran
+      description: Enlaces a medios, documentos o datos oficiales. Son lo que más ayuda.

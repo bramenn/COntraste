@@ -1,0 +1,10 @@
+All fonts in this folder are licensed under the SIL Open Font License 1.1 (https://openfontlicense.org),
+which allows bundling them with software and serving them on the web.
+
+- Newsreader — Production Type
+- Public Sans — USWDS
+- UnifrakturMaguntia — j. 'mach' wust
+- Playfair Display — Claus Eggers Sørensen
+- IM Fell English — Igino Marini
+- Space Grotesk — Florian Karsten
+- JetBrains Mono — JetBrains

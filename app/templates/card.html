@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<style>
+@font-face{font-family:D;src:url(data:font/woff2;base64,{{ fonts.display }}) format("woff2");font-weight:200 800}
+@font-face{font-family:B;src:url(data:font/woff2;base64,{{ fonts.body }}) format("woff2");font-weight:100 900}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:{{ w }}px;height:{{ h }}px;overflow:hidden}
+body{background:#f4f1e9;color:#141414;font-family:B,sans-serif;--c:{{ COLORS[rating] }}}
+.card{width:100%;height:100%;display:flex;flex-direction:column}
+.fill{flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0}
+.brand{display:flex;align-items:center;gap:14px;font-family:D,serif;font-weight:700;letter-spacing:-.01em}
+.logo{border-radius:50%;border:3px solid currentColor;background:linear-gradient(90deg,currentColor 50%,transparent 50%);flex:none}
+.label{font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:#55524a}
+.verdict{background:var(--c);color:#fff}
+.verdict .top{display:flex;align-items:center;gap:18px;font-weight:700;text-transform:uppercase;letter-spacing:.14em}
+.verdict .word{font-family:D,serif;font-weight:800;text-transform:uppercase;line-height:.92;letter-spacing:-.01em}
+.verdict .icon{flex:none}
+.claim{font-family:D,serif;font-weight:500;line-height:1.14;letter-spacing:-.005em}
+.lines{list-style:none;display:flex;flex-direction:column}
+.lines li{display:flex;align-items:flex-start;font-weight:500;line-height:1.24}
+.mark{flex:none;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center}
+.mark svg{stroke-width:3.4}
+.m-cierto{background:#1d6b3e}.m-falso{background:#b3261e}.m-no_probado{background:#50565e}
+.foot{border-top:4px solid #141414;display:flex;flex-direction:column}
+.foot .row{display:flex;justify-content:space-between;align-items:baseline;gap:24px}
+.cta{font-weight:800}
+.caution{background:#141414;color:#f4f1e9;font-weight:800;padding:10px 16px;margin:12px 0 4px;letter-spacing:.01em}
+.url{font-weight:600;color:#3c3a35;white-space:nowrap}
+.sources{color:#3c3a35}
+
+/* 1080 × 1350 and 1080 × 1920: no text below 28 px */
+.post .card,.story .card{padding:76px 80px}
+.story .card{padding:230px 80px 250px}
+.post header,.story header{display:flex;justify-content:space-between;align-items:center;font-size:28px}
+.post .brand,.story .brand{font-size:40px}
+.post .logo,.story .logo{width:40px;height:40px}
+.post .verdict,.story .verdict{margin-top:40px;padding:40px 56px 48px}
+.post .verdict .top,.story .verdict .top{font-size:28px;margin-bottom:18px}
+.post .verdict .word{font-size:150px}
+.story .verdict .word{font-size:164px}
+.post .sec,.story .sec{margin-top:44px}
+.post .label,.story .label{font-size:28px;margin-bottom:14px}
+.post .claim{font-size:52px}
+.story .claim{font-size:62px}
+.post .lines,.story .lines{gap:18px}
+.post .lines li,.story .lines li{gap:22px}
+.post .lines li{font-size:36px}
+.story .lines li{font-size:42px}
+.post .mark,.story .mark{width:50px;height:50px;margin-top:-2px}
+.story .sec{margin-top:64px}
+.post .foot,.story .foot{padding-top:26px;gap:12px;font-size:28px;margin-top:36px}
+.post .cta,.story .cta{font-size:32px}
+
+/* 1200 × 630 link preview (and the 1200 × 750 cover) */
+.og .card{flex-direction:row}
+.og .verdict{width:450px;flex:none;padding:44px 44px;display:flex;flex-direction:column;justify-content:space-between}
+.og .verdict .brand{font-size:30px}
+.og .logo{width:30px;height:30px}
+.og .verdict .word{font-size:92px}
+.og .verdict .top{font-size:22px;margin-bottom:14px}
+.og .main{flex:1;padding:44px 52px 40px;display:flex;flex-direction:column;min-width:0}
+.og .label{font-size:20px;margin-bottom:10px}
+.og .claim{font-size:40px}
+.og .sec{margin-top:26px}
+.og .lines{gap:10px}
+.og .lines li{font-size:25px;gap:14px}
+.og .mark{width:34px;height:34px}
+.og .foot{border-top-width:3px;padding-top:16px;margin-top:20px;font-size:22px}
+.og .cta{font-size:24px}
+.cover .verdict{width:470px}.cover .verdict .word{font-size:100px}
+.cover .main{padding:56px 56px 48px}.cover .claim{font-size:50px}.cover .label{font-size:22px}
+.cover .lines li{font-size:28px}
+
+/* Futuristic theme: dark panel with a faint grid; the rating glows in its own colour */
+{% set NEON = {"verdadero": "#34d399", "matices": "#a3e635", "enganoso": "#fbbf24", "falso": "#fb7185", "sin_pruebas": "#94a3b8", "no_verificable": "#60a5fa"} %}
+@font-face{font-family:M;src:url(data:font/woff2;base64,{{ fonts.mono }}) format("woff2");font-weight:400 700}
+body{--c:{{ NEON[rating] }};color:#e7eef8;font-family:B,sans-serif;background:
+  radial-gradient(700px 420px at 8% 0%,rgba(34,211,238,.16),transparent 60%),
+  radial-gradient(760px 460px at 100% 100%,rgba(167,139,250,.18),transparent 60%),
+  linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px) 0 0/48px 48px,
+  linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px) 0 0/48px 48px,#070b12}
+.logo{border-color:#22d3ee;background:linear-gradient(90deg,#22d3ee 50%,transparent 50%);box-shadow:0 0 18px rgba(34,211,238,.6)}
+.brand{font-family:D,sans-serif;font-weight:700;letter-spacing:-.04em;color:#f1f6fd}
+.label{font-family:M,monospace;font-weight:600;color:#8c9bb3;letter-spacing:.18em}
+.claim{font-family:D,sans-serif;font-weight:500;letter-spacing:-.02em;color:#f1f6fd}
+.lines li{color:#cfd9e8}
+.m-cierto{background:#10b981}.m-falso{background:#f43f5e}.m-no_probado{background:#64748b}
+.verdict{background:color-mix(in srgb,var(--c) 13%,transparent);color:var(--c);border:2px solid var(--c);border-radius:28px;
+  box-shadow:0 0 60px color-mix(in srgb,var(--c) 32%,transparent),inset 0 0 50px color-mix(in srgb,var(--c) 10%,transparent)}
+.verdict .top{font-family:M,monospace;color:var(--c)}
+.verdict .word{font-family:D,sans-serif;font-weight:700;letter-spacing:-.035em;color:var(--c);text-shadow:0 0 34px color-mix(in srgb,var(--c) 55%,transparent)}
+.foot{border-top:1px solid #2c3c56}
+.cta{font-family:D,sans-serif;font-weight:700;color:#f1f6fd;letter-spacing:-.01em}
+.caution{background:#fbbf24;color:#1a1300;border-radius:12px}
+.url,.sources{color:#8c9bb3}.url{font-family:M,monospace}
+.post header,.story header{border-bottom:1px solid #2c3c56;padding-bottom:20px}
+.post header>span,.story header>span{font-family:M,monospace;color:#8c9bb3}
+.post .brand,.story .brand{font-size:54px}
+.post .logo,.story .logo{width:44px;height:44px}
+/* Link preview and listing cover: brand column on the left, glowing rating in the middle */
+.og .verdict{border:0;border-radius:0;border-right:1px solid #2c3c56;background:rgba(13,20,32,.55);box-shadow:none;color:#f1f6fd}
+.og .verdict .brand{font-size:40px}
+.og .verdict>div:nth-child(2){align-self:stretch;min-width:0;color:var(--c);border:2px solid var(--c);border-radius:22px;padding:14px 18px 18px;
+  background:color-mix(in srgb,var(--c) 13%,transparent);box-shadow:0 0 44px color-mix(in srgb,var(--c) 32%,transparent)}
+.og .verdict .word{overflow:hidden}
+.og .verdict .top{color:inherit}
+.og .verdict>.top{font-family:M,monospace;letter-spacing:.22em;color:#8c9bb3}
+</style></head>
+<body class="{{ 'og cover' if fmt == 'cover' else fmt }}">
+{% macro word() %}<div class="word" data-fitw="{{ 40 if fmt in ('og', 'cover') else 72 }}" data-fith="{{ 40 if fmt in ('og', 'cover') else 84 }}">{{ RATINGS[rating] }}</div>{% endmacro %}
+{% macro lines_block(n) %}
+<ul class="lines">{% for l in lines[:n] %}
+<li><span class="mark m-{{ l.mark }}">{{ icon(MARK_ICON[l.mark], 24 if fmt in ('og', 'cover') else 34) }}</span><span data-fith="{{ 20 if fmt in ('og', 'cover') else 28 }}">{{ l.text }}</span></li>{% endfor %}
+</ul>{% endmacro %}
+<div class="card">
+{% if fmt in ('og', 'cover') %}
+  <section class="verdict">
+    <div class="brand"><span class="logo"></span>Contraste</div>
+    <div><div class="top">{{ icon(rating, 64) }}</div>{{ word() }}</div>
+    <div class="top">Verificación</div>
+  </section>
+  <section class="main">
+    <div class="fill">
+      <div class="label">Lo que circula</div>
+      <p class="claim" data-fith="26">“{{ circulating }}”</p>
+      <div class="sec"><div class="label">Lo que encontramos</div>{{ lines_block(2) }}</div>
+    </div>
+    {% if fmt == 'og' %}<footer class="foot">{% if caution %}<div class="caution">{{ caution }}</div>{% endif %}<div class="row"><span class="cta">Verifica antes de compartir</span><span class="url">{{ short_url }}</span></div></footer>{% endif %}
+  </section>
+{% else %}
+  <header><div class="brand"><span class="logo"></span>Contraste</div><span>{{ date }}</span></header>
+  <div class="fill">
+    <section class="verdict">
+      <div class="top">{{ icon(rating, 72) }}<span>Calificación</span></div>
+      {{ word() }}
+    </section>
+    <section class="sec"><div class="label">Lo que circula</div><p class="claim" data-fith="34">“{{ circulating }}”</p></section>
+    <section class="sec"><div class="label">Lo que encontramos</div>{{ lines_block(3) }}</section>
+  </div>
+  <footer class="foot">
+    {% if caution %}<div class="caution">{{ caution }}</div>{% endif %}
+    {% if n_sources %}<div class="sources">{{ n_sources }} fuente{{ 's' if n_sources != 1 }}: {{ source_names|join(' · ') }}</div>{% endif %}
+    <div class="row"><span class="cta">Verifica antes de compartir</span><span class="url">{{ short_url }}</span></div>
+  </footer>
+{% endif %}
+</div>
+<script>
+document.fonts.ready.then(() => {
+  const size = el => parseFloat(getComputedStyle(el).fontSize);
+  for (const el of document.querySelectorAll('[data-fitw]')) {
+    while (el.scrollWidth > el.clientWidth + 1 && size(el) > +el.dataset.fitw) el.style.fontSize = size(el) - 2 + 'px';
+  }
+  const fill = document.querySelector('.fill'), els = [...document.querySelectorAll('[data-fith]')];
+  for (let guard = 120; fill.scrollHeight > fill.clientHeight + 1 && guard; guard--) {
+    let changed = false;
+    for (const el of els) if (size(el) > +el.dataset.fith) { el.style.fontSize = size(el) - 2 + 'px'; changed = true; }
+    if (!changed) break;
+  }
+  document.body.dataset.ready = 1;
+});
+</script>
+</body></html>

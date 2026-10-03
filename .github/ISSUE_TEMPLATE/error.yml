@@ -1,0 +1,27 @@
+name: Error del sitio
+description: Algo del sitio o de la instalación no funciona como debería.
+title: "[Error] "
+labels: ["error"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: Qué pasó
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Pasos para reproducirlo
+      placeholder: "1. Abrí...\n2. Pegué...\n3. Vi..."
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Qué esperabas que pasara
+  - type: input
+    id: where
+    attributes:
+      label: Dónde
+      description: Navegador y dispositivo, o tu instalación (versión, Docker, Kubernetes).

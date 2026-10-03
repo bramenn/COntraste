@@ -1,0 +1,41 @@
+services:
+  db:
+    image: docker.io/library/postgres:16-alpine
+    environment:
+      POSTGRES_USER: contraste
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-contraste}
+      POSTGRES_DB: contraste
+    volumes:
+      - contraste-pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U contraste"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  app:
+    build:
+      context: .
+      args:
+        WHISPER_MODEL: ${WHISPER_MODEL:-small}
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://contraste:${POSTGRES_PASSWORD:-contraste}@db:5432/contraste
+      TEST_DATABASE_URL: postgresql://contraste:${POSTGRES_PASSWORD:-contraste}@db:5432/contraste_test
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      # Only this machine by default. BIND_ADDR=0.0.0.0 exposes it to the local network (a tunnel does not need it).
+      - "${BIND_ADDR:-127.0.0.1}:8080:8080"
+    volumes:
+      - contraste-data:/data  # only needed once, to move the old SQLite data into Postgres
+      - ./sources.yaml:/app/sources.yaml:ro,z
+    # Running checks get time to finish on shutdown; anything left goes back to the queue.
+    stop_grace_period: 3m
+    restart: unless-stopped
+
+volumes:
+  contraste-data:
+  contraste-pg:

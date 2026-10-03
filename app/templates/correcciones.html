@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% set nav = 'correcciones' %}
+{% block title %}Correcciones · Contraste{% endblock %}
+{% block main %}
+<div class="wrap">
+<section class="section">
+  <h1>Correcciones</h1>
+  {% if rows %}
+  <ul class="list mt-s">{% for c in rows %}
+    <li>
+      <p class="meta">{{ format_date(c.at) }}{% if c.old_rating != c.new_rating %} · {{ RATINGS[c.old_rating] }} → {{ RATINGS[c.new_rating] }}{% endif %}</p>
+      <p class="t"><a href="{{ path_of({'id': c.aid, 'slug': c.slug, 'created_at': c.a_created}) }}">{{ c.title }}</a></p>
+      <p>{{ c.note }}</p>
+    </li>{% endfor %}
+  </ul>
+  {% else %}<p class="empty mt-s">No hay correcciones por ahora.</p>{% endif %}
+</section>
+</div>
+{% endblock %}

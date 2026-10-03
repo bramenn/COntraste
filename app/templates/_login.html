@@ -1,0 +1,8 @@
+<form class="stack login-form" data-next="{{ next or '/' }}">
+  <label>Tu correo <input type="email" name="email" required autocomplete="email" maxlength="254"></label>
+  <label class="check-line"><input type="checkbox" name="consent" value="1" required> Acepto la <a href="/privacidad" target="_blank">política de tratamiento de datos</a>.</label>
+  <button class="btn primary" type="submit">Enviarme un enlace para entrar</button>
+  {% if GOOGLE %}<button class="btn" type="button" data-google>Entrar con Google</button>{% endif %}
+  <p class="muted">Sin contraseñas. El enlace vence en 15 minutos y sirve una sola vez.</p>
+  <p class="form-status" role="status" hidden></p>
+</form>
