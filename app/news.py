@@ -22,7 +22,7 @@ SEARCH = "https://news.google.com/rss/search?q=Colombia&hl=es-419&gl=CO&ceid=CO:
 FALLBACK = ("Despidieron a la periodista Camila Zuluaga de Blu Radio por criticar a Abelardo, pero durante los "
             "4 años de Petro nunca peligró su programa.")
 # Never offered as a sample: stories about children or that could hurt a private person if checked for fun.
-SENSITIVE = re.compile(r"menor(es)? de edad|\bniñ[oa]s?\b|adolescente|abuso sexual|violaci[oó]n|suicid|feminicid", re.I)
+SENSITIVE = re.compile(r"menor(es)? de edad|\bniñ[oa]s?\b|adolescente|sexual|violaci[oó]n|acoso|suicid|feminicid", re.I)
 
 
 def clean(title: str) -> str:
@@ -110,4 +110,5 @@ if __name__ == "__main__":
     assert clean("Juan Manuel Santos no está de acuerdo con prorrogar la JEP - Revista Semana") == \
         "Juan Manuel Santos no está de acuerdo con prorrogar la JEP"
     assert SENSITIVE.search("Menor de edad que le disparó al exalcalde")
+    assert SENSITIVE.search("Fiscalía imputará a X por acoso y acto sexual violento")
     print("ok")
