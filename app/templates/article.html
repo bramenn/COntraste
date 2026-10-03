@@ -74,6 +74,18 @@
           <span>{{ plural(r.sources|length, 'fuente', 'fuentes') }}</span>
           <span>{% if row.human_reviewed_at %}Revisada por el equipo el {{ format_date(row.human_reviewed_at) }}{% else %}Verificación automatizada con reglas fijas{% endif %}</span>
         </p>
+        {% if r.claims %}
+        <div class="ai-bar" role="group" aria-labelledby="ai-bar-label">
+          <span class="ai-bar-label" id="ai-bar-label">Profundiza con tu IA</span>
+          <a class="ai-btn ai-chatgpt" href="https://chatgpt.com/?q={{ ai_prompt|urlencode }}" target="_blank" rel="noopener noreferrer" title="Abrir esta verificación en ChatGPT, con la evidencia">{% include "icons/openai.svg" %}<span>ChatGPT</span></a>
+          <a class="ai-btn ai-claude" href="https://claude.ai/new?q={{ ai_prompt|urlencode }}" target="_blank" rel="noopener noreferrer" title="Abrir esta verificación en Claude, con la evidencia">{% include "icons/claude.svg" %}<span>Claude</span></a>
+          <button class="ai-btn ai-icon" type="button" data-copy-ai aria-label="Copiar para otra IA" title="Copiar para otra IA (Gemini, Perplexity…)">{{ ui('copy', 18) }}</button>
+          <button class="ai-btn ai-icon" type="button" data-share-ai hidden aria-label="Compartir con otra app" title="Compartir con otra app">{{ ui('share', 18) }}</button>
+          <a class="ai-md" href="{{ path }}.md" title="Esta verificación en Markdown">.md</a>
+          <template id="ai-prompt">{{ ai_prompt }}</template>
+          <span class="ai-status" id="ai-status" role="status" hidden></span>
+        </div>
+        {% endif %}
       </header>
 
       <section class="block" aria-labelledby="h-circula">
@@ -171,21 +183,6 @@
         </details>
         {% endif %}
       </section>
-
-      {% if r.claims %}
-      <section class="block" aria-labelledby="h-ai">
-        <h2 id="h-ai">Sigue investigando con tu asistente de IA</h2>
-        <p class="muted">Abre esta verificación en tu cuenta de ChatGPT o de Claude, con la evidencia, para debatirla o profundizar. Solo va el contenido público de esta página. También está <a href="{{ path }}.md">en Markdown</a>.</p>
-        <div class="ai-actions">
-          <a class="btn" href="https://chatgpt.com/?q={{ ai_prompt|urlencode }}" target="_blank" rel="noopener noreferrer">Seguir en ChatGPT</a>
-          <a class="btn" href="https://claude.ai/new?q={{ ai_prompt|urlencode }}" target="_blank" rel="noopener noreferrer">Seguir en Claude</a>
-          <button class="btn" type="button" data-copy-ai>Copiar para otra IA</button>
-          <button class="btn" type="button" data-share-ai hidden>Compartir con otra app</button>
-        </div>
-        <template id="ai-prompt">{{ ai_prompt }}</template>
-        <p class="form-status" id="ai-status" role="status" hidden></p>
-      </section>
-      {% endif %}
 
       {% if r.notes %}<section class="block stack" aria-label="Notas">{% for n in r.notes %}<p class="note">{{ n }}</p>{% endfor %}</section>{% endif %}
 
