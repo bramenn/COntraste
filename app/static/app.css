@@ -670,14 +670,23 @@ img{transition:opacity .25s}
 /* Colombian flag in motion: the logo cycles yellow, blue, red; "¿Es cierto?" lets the three colours flow.
    Blue and red are lightened a little so they read on the dark background. */
 :root{--co-yellow:#fcd116;--co-blue:#4d7cff;--co-red:#ef3e4a}
-.logo{color:var(--co-yellow);border-color:currentColor;background:linear-gradient(90deg,currentColor 50%,transparent 50%);
-  box-shadow:0 0 14px currentColor;animation:co-flag 9s ease-in-out infinite}
-@keyframes co-flag{0%,100%{color:var(--co-yellow)}33%{color:var(--co-blue)}66%{color:var(--co-red)}}
+/* The logo is an eclipse: a white sun, the moon crossing it through every phase, and at totality the yellow
+   corona; then the moon leaves and the white sun returns. The moon is clipped to the disc (overflow:hidden),
+   so it only shows over the sun; the corona is the ring and its glow. */
+.logo{position:relative;overflow:hidden;color:#f1f6fd;border:2px solid currentColor;background:#f1f6fd;
+  box-shadow:0 0 6px rgb(241 246 253/.35);animation:eclipse-corona 10s ease-in-out infinite}
+.logo::before{content:"";position:absolute;inset:-2px;border-radius:50%;background:#05080d;transform:translateX(-120%);
+  animation:eclipse-moon 10s ease-in-out infinite}
+@keyframes eclipse-moon{0%,10%{transform:translateX(-120%)}45%,55%{transform:translateX(0)}90%,100%{transform:translateX(120%)}}
+@keyframes eclipse-corona{
+  0%,10%,90%,100%{color:#f1f6fd;box-shadow:0 0 6px rgb(241 246 253/.35)}
+  38%,62%{color:#f1f6fd;box-shadow:0 0 8px rgb(252 209 22/.3)}
+  45%,55%{color:var(--co-yellow);box-shadow:0 0 6px 2px rgb(252 209 22/.9),0 0 18px 6px rgb(252 209 22/.45)}}
 .hero h1{background:linear-gradient(100deg,#f1f6fd 0%,#f1f6fd 18%,var(--co-yellow) 34%,var(--co-yellow) 48%,var(--co-blue) 66%,
   var(--co-red) 82%,#f1f6fd 100%);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;
   animation:co-flow 12s ease-in-out infinite alternate}
 @keyframes co-flow{from{background-position:0% 50%}to{background-position:100% 50%}}
-@media (prefers-reduced-motion:reduce){.logo,.hero h1{animation:none}.hero h1{background-position:40% 50%}}
+@media (prefers-reduced-motion:reduce){.logo,.logo::before,.hero h1{animation:none}.logo::before{transform:translateX(50%)}.hero h1{background-position:40% 50%}}
 .welcome-note{margin-top:14px}
 /* Continue with an AI assistant: right under the verdict, where it is seen without scrolling. */
 .ai-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 12px;border:1px solid var(--line);
