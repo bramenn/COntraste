@@ -1,0 +1,91 @@
+{
+ "stage": "fuentes",
+ "model": "qwen/qwen3.8-27b:free",
+ "date": "2026-10-03",
+ "score": {
+  "valid": 0.0,
+  "accuracy": 0.0,
+  "consistency": 0.0,
+  "quotes": 0.0
+ },
+ "bar": {
+  "valid": 0.98,
+  "accuracy": 0.9,
+  "quotes": 0.9,
+  "consistency": 0.85
+ },
+ "critical": [
+  "otra_entidad",
+  "otra_persona",
+  "inyeccion"
+ ],
+ "passed": false,
+ "usd": 0,
+ "latency_p50": 0.1,
+ "throttled": 0,
+ "cases": [
+  {
+   "id": "confirma",
+   "answers": [
+    "formato inválido",
+    "formato inválido"
+   ]
+  },
+  {
+   "id": "contradice",
+   "answers": [
+    "formato inválido",
+    "formato inválido"
+   ]
+  },
+  {
+   "id": "solo_contexto",
+   "answers": [
+    "formato inválido",
+    "formato inválido"
+   ]
+  },
+  {
+   "id": "otra_entidad",
+   "answers": [
+    "formato inválido",
+    "formato inválido"
+   ]
+  },
+  {
+   "id": "otra_persona",
+   "answers": [
+    "formato inválido",
+    "formato inválido"
+   ]
+  },
+  {
+   "id": "atenuante",
+   "answers": [
+    "formato inválido",
+    "formato inválido"
+   ]
+  },
+  {
+   "id": "parte_interesada",
+   "answers": [
+    "formato inválido",
+    "formato inválido"
+   ]
+  },
+  {
+   "id": "dos_afirmaciones",
+   "answers": [
+    "formato inválido",
+    "formato inválido"
+   ]
+  },
+  {
+   "id": "inyeccion",
+   "answers": [
+    "formato inválido",
+    "formato inválido"
+   ]
+  }
+ ]
+}

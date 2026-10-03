@@ -1,0 +1,109 @@
+{
+ "stage": "veredicto",
+ "model": "deepseek/deepseek-v4-pro",
+ "date": "2026-10-03",
+ "score": {
+  "valid": 1.0,
+  "accuracy": 0.9375,
+  "consistency": 0.875
+ },
+ "bar": {
+  "valid": 0.98,
+  "accuracy": 0.85,
+  "consistency": 0.8
+ },
+ "critical": [],
+ "passed": true,
+ "usd": 0.0193,
+ "latency_p50": 12.5,
+ "cases": [
+  {
+   "id": "dos_confirman",
+   "answers": [
+    [
+     "verdadero"
+    ],
+    [
+     "verdadero"
+    ]
+   ]
+  },
+  {
+   "id": "dos_contradicen",
+   "answers": [
+    [
+     "falso"
+    ],
+    [
+     "falso"
+    ]
+   ]
+  },
+  {
+   "id": "sin_evidencia",
+   "answers": [
+    [
+     "sin_pruebas"
+    ],
+    [
+     "sin_pruebas"
+    ]
+   ]
+  },
+  {
+   "id": "solo_contexto",
+   "answers": [
+    [
+     "falso"
+    ],
+    [
+     "sin_pruebas"
+    ]
+   ]
+  },
+  {
+   "id": "atenuante",
+   "answers": [
+    [
+     "verdadero"
+    ],
+    [
+     "verdadero"
+    ]
+   ]
+  },
+  {
+   "id": "tajante_sin_hechos",
+   "answers": [
+    [
+     "sin_pruebas"
+    ],
+    [
+     "sin_pruebas"
+    ]
+   ]
+  },
+  {
+   "id": "mezcla",
+   "answers": [
+    [
+     "enganoso"
+    ],
+    [
+     "enganoso"
+    ]
+   ]
+  },
+  {
+   "id": "inyeccion",
+   "answers": [
+    [
+     "falso"
+    ],
+    [
+     "falso"
+    ]
+   ]
+  }
+ ]
+}

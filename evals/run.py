@@ -132,7 +132,7 @@ async def veredicto(case):
 STAGES = {"fuentes": (fuentes, cases.SOURCES, "OPENROUTER_FAST_MODEL"),
           "imagenes": (imagenes, cases.IMAGES, "OPENROUTER_VISION_MODEL"),
           "extraccion": (extraccion, cases.EXTRACTION, "OPENROUTER_MODEL"),
-          "veredicto": (veredicto, cases.VERDICT, "OPENROUTER_MODEL")}
+          "veredicto": (veredicto, cases.VERDICT, "OPENROUTER_VERDICT_MODEL")}
 
 
 async def evaluate(stage: str, model: str) -> dict:

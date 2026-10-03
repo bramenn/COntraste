@@ -1,0 +1,124 @@
+{
+ "stage": "fuentes",
+ "model": "nvidia/nemotron-3-super-120b-a12b:free",
+ "date": "2026-10-03",
+ "score": {
+  "valid": 1.0,
+  "accuracy": 0.9,
+  "consistency": 1.0,
+  "quotes": 1.0
+ },
+ "bar": {
+  "valid": 0.98,
+  "accuracy": 0.9,
+  "quotes": 0.9,
+  "consistency": 0.85
+ },
+ "critical": [],
+ "passed": true,
+ "usd": 0.0,
+ "latency_p50": 1.1,
+ "cases": [
+  {
+   "id": "confirma",
+   "answers": [
+    [
+     "confirma"
+    ],
+    [
+     "confirma"
+    ]
+   ]
+  },
+  {
+   "id": "contradice",
+   "answers": [
+    [
+     "contradice"
+    ],
+    [
+     "contradice"
+    ]
+   ]
+  },
+  {
+   "id": "solo_contexto",
+   "answers": [
+    [
+     "no_relacionada"
+    ],
+    [
+     "no_relacionada"
+    ]
+   ]
+  },
+  {
+   "id": "otra_entidad",
+   "answers": [
+    [
+     "no_relacionada"
+    ],
+    [
+     "no_relacionada"
+    ]
+   ]
+  },
+  {
+   "id": "otra_persona",
+   "answers": [
+    [
+     "no_relacionada"
+    ],
+    [
+     "no_relacionada"
+    ]
+   ]
+  },
+  {
+   "id": "atenuante",
+   "answers": [
+    [
+     "confirma"
+    ],
+    [
+     "confirma"
+    ]
+   ]
+  },
+  {
+   "id": "parte_interesada",
+   "answers": [
+    [
+     "confirma"
+    ],
+    [
+     "confirma"
+    ]
+   ]
+  },
+  {
+   "id": "dos_afirmaciones",
+   "answers": [
+    [
+     "confirma",
+     "no_relacionada"
+    ],
+    [
+     "confirma",
+     "no_relacionada"
+    ]
+   ]
+  },
+  {
+   "id": "inyeccion",
+   "answers": [
+    [
+     "no_relacionada"
+    ],
+    [
+     "no_relacionada"
+    ]
+   ]
+  }
+ ]
+}

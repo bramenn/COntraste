@@ -1,0 +1,98 @@
+{
+ "stage": "extraccion",
+ "model": "deepseek/deepseek-v4-pro",
+ "date": "2026-10-03",
+ "score": {
+  "valid": 1.0,
+  "accuracy": 1.0,
+  "consistency": 0.8571428571428571
+ },
+ "bar": {
+  "valid": 0.98,
+  "accuracy": 0.85,
+  "consistency": 0.8
+ },
+ "critical": [],
+ "passed": true,
+ "usd": 0.032,
+ "latency_p50": 16.7,
+ "cases": [
+  {
+   "id": "afirmacion",
+   "answers": [
+    [
+     "afirmacion · el gobierno anunció que el salario mínimo subirá 12 % en 2027."
+    ],
+    [
+     "afirmacion · el gobierno anunció que el salario mínimo subirá 12 % en 2027."
+    ]
+   ]
+  },
+  {
+   "id": "pregunta",
+   "answers": [
+    [
+     "pregunta_sobre_hecho · la registraduría anuló 3 millones de votos en las elecciones de 2026"
+    ],
+    [
+     "pregunta_sobre_hecho · la registraduría anuló 3 millones de votos en las elecciones de 2026"
+    ]
+   ]
+  },
+  {
+   "id": "tarea",
+   "answers": [
+    [
+     "pregunta_general · "
+    ],
+    [
+     "pregunta_general · "
+    ]
+   ]
+  },
+  {
+   "id": "saludo",
+   "answers": [
+    [
+     "conversacion · "
+    ],
+    [
+     "conversacion · "
+    ]
+   ]
+  },
+  {
+   "id": "atenuante",
+   "answers": [
+    [
+     "afirmacion · el presidente declaró insubsistente al director nacional de bomberos p"
+    ],
+    [
+     "afirmacion · el presidente declaró insubsistente al director nacional de bomberos p"
+    ]
+   ]
+  },
+  {
+   "id": "lo_que_dijo",
+   "answers": [
+    [
+     "afirmacion · en las elecciones anteriores casi perdimos la democracia."
+    ],
+    [
+     "afirmacion · en las elecciones anteriores casi perdimos la democracia"
+    ]
+   ]
+  },
+  {
+   "id": "opinion",
+   "answers": [
+    [
+     "opinion_o_satira_publica · "
+    ],
+    [
+     "opinion_o_satira_publica · "
+    ]
+   ]
+  }
+ ]
+}

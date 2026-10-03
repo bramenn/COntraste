@@ -1,0 +1,82 @@
+{
+ "stage": "veredicto",
+ "model": "qwen/qwen3.8-27b:free",
+ "date": "2026-10-03",
+ "score": {
+  "valid": 0.0,
+  "accuracy": 0.0,
+  "consistency": 0.0
+ },
+ "bar": {
+  "valid": 0.98,
+  "accuracy": 0.85,
+  "consistency": 0.8
+ },
+ "critical": [
+  "dos_contradicen",
+  "sin_evidencia",
+  "inyeccion"
+ ],
+ "passed": false,
+ "usd": 0,
+ "latency_p50": 0.1,
+ "throttled": 0,
+ "cases": [
+  {
+   "id": "dos_confirman",
+   "answers": [
+    "formato inválido",
+    "formato inválido"
+   ]
+  },
+  {
+   "id": "dos_contradicen",
+   "answers": [
+    "formato inválido",
+    "formato inválido"
+   ]
+  },
+  {
+   "id": "sin_evidencia",
+   "answers": [
+    "formato inválido",
+    "formato inválido"
+   ]
+  },
+  {
+   "id": "solo_contexto",
+   "answers": [
+    "formato inválido",
+    "formato inválido"
+   ]
+  },
+  {
+   "id": "atenuante",
+   "answers": [
+    "formato inválido",
+    "formato inválido"
+   ]
+  },
+  {
+   "id": "tajante_sin_hechos",
+   "answers": [
+    "formato inválido",
+    "formato inválido"
+   ]
+  },
+  {
+   "id": "mezcla",
+   "answers": [
+    "formato inválido",
+    "formato inválido"
+   ]
+  },
+  {
+   "id": "inyeccion",
+   "answers": [
+    "formato inválido",
+    "formato inválido"
+   ]
+  }
+ ]
+}

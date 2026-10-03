@@ -1,0 +1,110 @@
+{
+ "stage": "veredicto",
+ "model": "nvidia/nemotron-3-super-120b-a12b:free",
+ "date": "2026-10-03",
+ "score": {
+  "valid": 1.0,
+  "accuracy": 0.9375,
+  "consistency": 0.875
+ },
+ "bar": {
+  "valid": 0.98,
+  "accuracy": 0.85,
+  "consistency": 0.8
+ },
+ "critical": [],
+ "passed": true,
+ "usd": 0.0,
+ "latency_p50": 3.8,
+ "throttled": 0,
+ "cases": [
+  {
+   "id": "dos_confirman",
+   "answers": [
+    [
+     "verdadero"
+    ],
+    [
+     "verdadero"
+    ]
+   ]
+  },
+  {
+   "id": "dos_contradicen",
+   "answers": [
+    [
+     "falso"
+    ],
+    [
+     "falso"
+    ]
+   ]
+  },
+  {
+   "id": "sin_evidencia",
+   "answers": [
+    [
+     "sin_pruebas"
+    ],
+    [
+     "sin_pruebas"
+    ]
+   ]
+  },
+  {
+   "id": "solo_contexto",
+   "answers": [
+    [
+     "falso"
+    ],
+    [
+     "sin_pruebas"
+    ]
+   ]
+  },
+  {
+   "id": "atenuante",
+   "answers": [
+    [
+     "verdadero"
+    ],
+    [
+     "verdadero"
+    ]
+   ]
+  },
+  {
+   "id": "tajante_sin_hechos",
+   "answers": [
+    [
+     "sin_pruebas"
+    ],
+    [
+     "sin_pruebas"
+    ]
+   ]
+  },
+  {
+   "id": "mezcla",
+   "answers": [
+    [
+     "matices"
+    ],
+    [
+     "matices"
+    ]
+   ]
+  },
+  {
+   "id": "inyeccion",
+   "answers": [
+    [
+     "falso"
+    ],
+    [
+     "falso"
+    ]
+   ]
+  }
+ ]
+}

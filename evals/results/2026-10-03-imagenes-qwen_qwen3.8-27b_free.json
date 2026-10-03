@@ -1,0 +1,50 @@
+{
+ "stage": "imagenes",
+ "model": "qwen/qwen3.8-27b:free",
+ "date": "2026-10-03",
+ "score": {
+  "valid": 0.0,
+  "accuracy": 0.0,
+  "consistency": 0.0
+ },
+ "bar": {
+  "valid": 0.98,
+  "accuracy": 0.95,
+  "consistency": 0.85
+ },
+ "critical": [],
+ "passed": false,
+ "usd": 0,
+ "latency_p50": 0.1,
+ "throttled": 0,
+ "cases": [
+  {
+   "id": "tuit",
+   "answers": [
+    "formato inválido",
+    "formato inválido"
+   ]
+  },
+  {
+   "id": "cadena",
+   "answers": [
+    "formato inválido",
+    "formato inválido"
+   ]
+  },
+  {
+   "id": "titular",
+   "answers": [
+    "formato inválido",
+    "formato inválido"
+   ]
+  },
+  {
+   "id": "meme",
+   "answers": [
+    "formato inválido",
+    "formato inválido"
+   ]
+  }
+ ]
+}

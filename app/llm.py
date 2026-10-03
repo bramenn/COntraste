@@ -358,7 +358,8 @@ async def ask(task: str, data: str, model_cls, *, image_b64: str | None = None, 
         content.append({"type": "image_url", "image_url": {"url": f"data:image/png;base64,{image_b64}"}})
     messages = [{"role": "system", "content": _system(model_cls, nonce)},
                 {"role": "user", "content": content if image_b64 else user}]
-    model = settings.OPENROUTER_VISION_MODEL if vision else settings.OPENROUTER_FAST_MODEL if fast else settings.OPENROUTER_MODEL
+    model = (settings.OPENROUTER_VISION_MODEL if vision else settings.OPENROUTER_FAST_MODEL if fast
+             else settings.OPENROUTER_VERDICT_MODEL if model_cls is Verdict else settings.OPENROUTER_MODEL)
     last = None
     for _ in range(2):
         raw = await _complete(messages, model, fast=fast)

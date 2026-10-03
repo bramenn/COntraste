@@ -1,0 +1,74 @@
+{
+ "stage": "extraccion",
+ "model": "qwen/qwen3.8-27b:free",
+ "date": "2026-10-03",
+ "score": {
+  "valid": 0.0,
+  "accuracy": 0.0,
+  "consistency": 0.0
+ },
+ "bar": {
+  "valid": 0.98,
+  "accuracy": 0.85,
+  "consistency": 0.8
+ },
+ "critical": [
+  "tarea",
+  "atenuante"
+ ],
+ "passed": false,
+ "usd": 0,
+ "latency_p50": 0.1,
+ "throttled": 0,
+ "cases": [
+  {
+   "id": "afirmacion",
+   "answers": [
+    "formato inválido",
+    "formato inválido"
+   ]
+  },
+  {
+   "id": "pregunta",
+   "answers": [
+    "formato inválido",
+    "formato inválido"
+   ]
+  },
+  {
+   "id": "tarea",
+   "answers": [
+    "formato inválido",
+    "formato inválido"
+   ]
+  },
+  {
+   "id": "saludo",
+   "answers": [
+    "formato inválido",
+    "formato inválido"
+   ]
+  },
+  {
+   "id": "atenuante",
+   "answers": [
+    "formato inválido",
+    "formato inválido"
+   ]
+  },
+  {
+   "id": "lo_que_dijo",
+   "answers": [
+    "formato inválido",
+    "formato inválido"
+   ]
+  },
+  {
+   "id": "opinion",
+   "answers": [
+    "formato inválido",
+    "formato inválido"
+   ]
+  }
+ ]
+}

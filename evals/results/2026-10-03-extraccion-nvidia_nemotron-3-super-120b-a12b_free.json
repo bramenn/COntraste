@@ -1,0 +1,99 @@
+{
+ "stage": "extraccion",
+ "model": "nvidia/nemotron-3-super-120b-a12b:free",
+ "date": "2026-10-03",
+ "score": {
+  "valid": 1.0,
+  "accuracy": 0.8571428571428571,
+  "consistency": 0.7142857142857143
+ },
+ "bar": {
+  "valid": 0.98,
+  "accuracy": 0.85,
+  "consistency": 0.8
+ },
+ "critical": [],
+ "passed": false,
+ "usd": 0.0,
+ "latency_p50": 7.1,
+ "throttled": 0,
+ "cases": [
+  {
+   "id": "afirmacion",
+   "answers": [
+    [
+     "afirmacion · el gobierno anunció que el salario mínimo subirá un 12 % en 2027"
+    ],
+    [
+     "afirmacion · "
+    ]
+   ]
+  },
+  {
+   "id": "pregunta",
+   "answers": [
+    [
+     "pregunta_sobre_hecho · la registraduría anuló 3 millones de votos en las elecciones de 2026"
+    ],
+    [
+     "pregunta_sobre_hecho · la registraduría anuló 3 millones de votos en las elecciones de 2026"
+    ]
+   ]
+  },
+  {
+   "id": "tarea",
+   "answers": [
+    [
+     "pregunta_general · "
+    ],
+    [
+     "pregunta_general · "
+    ]
+   ]
+  },
+  {
+   "id": "saludo",
+   "answers": [
+    [
+     "conversacion · "
+    ],
+    [
+     "conversacion · "
+    ]
+   ]
+  },
+  {
+   "id": "atenuante",
+   "answers": [
+    [
+     "afirmacion · el presidente declaró insubsistente al director nacional de bomberos p"
+    ],
+    [
+     "afirmacion · el presidente declaró insubsistente al director nacional de bomberos p"
+    ]
+   ]
+  },
+  {
+   "id": "lo_que_dijo",
+   "answers": [
+    [
+     "afirmacion · en las elecciones anteriores colombia casi perdió la democracia."
+    ],
+    [
+     "afirmacion · el vicepresidente le dijo a trump: «en las elecciones anteriores casi "
+    ]
+   ]
+  },
+  {
+   "id": "opinion",
+   "answers": [
+    [
+     "opinion_o_satira_publica · "
+    ],
+    [
+     "opinion_o_satira_publica · "
+    ]
+   ]
+  }
+ ]
+}

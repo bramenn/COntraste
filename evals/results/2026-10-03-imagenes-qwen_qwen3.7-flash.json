@@ -1,0 +1,65 @@
+{
+ "stage": "imagenes",
+ "model": "qwen/qwen3.7-flash",
+ "date": "2026-10-03",
+ "score": {
+  "valid": 1.0,
+  "accuracy": 1.0,
+  "consistency": 1.0
+ },
+ "bar": {
+  "valid": 0.98,
+  "accuracy": 0.95,
+  "consistency": 0.85
+ },
+ "critical": [],
+ "passed": true,
+ "usd": 0.0006,
+ "latency_p50": 8.8,
+ "cases": [
+  {
+   "id": "tuit",
+   "answers": [
+    [
+     "leído captura_red_social"
+    ],
+    [
+     "leído captura_red_social"
+    ]
+   ]
+  },
+  {
+   "id": "cadena",
+   "answers": [
+    [
+     "leído captura_red_social"
+    ],
+    [
+     "leído captura_red_social"
+    ]
+   ]
+  },
+  {
+   "id": "titular",
+   "answers": [
+    [
+     "leído titular"
+    ],
+    [
+     "leído titular"
+    ]
+   ]
+  },
+  {
+   "id": "meme",
+   "answers": [
+    [
+     "leído captura_red_social"
+    ],
+    [
+     "leído captura_red_social"
+    ]
+   ]
+  }
+ ]
+}

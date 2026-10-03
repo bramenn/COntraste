@@ -11,7 +11,7 @@ Cualquiera puede repetir la prueba con un solo comando y proponer otro modelo co
 | `fuentes` | Lee cada fuente y dice si confirma, contradice, da contexto o no tiene relación, con una cita textual. Es la mayoría de las llamadas. | `OPENROUTER_FAST_MODEL` |
 | `imagenes` | Transcribe y describe capturas, titulares, cadenas y memes. | `OPENROUTER_VISION_MODEL` |
 | `extraccion` | Separa lo que circula en afirmaciones verificables y marca la central. | `OPENROUTER_MODEL` |
-| `veredicto` | Califica cada afirmación con la evidencia que le llega. | `OPENROUTER_MODEL` |
+| `veredicto` | Califica cada afirmación con la evidencia que le llega. | `OPENROUTER_VERDICT_MODEL` (si no, `OPENROUTER_MODEL`) |
 
 El filtro de entrada (Jev) tiene su propia prueba con casos reales: `tests/gate_eval.py`.
 
