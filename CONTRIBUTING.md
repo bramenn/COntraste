@@ -22,8 +22,11 @@ qué se publica como cierto o falso, así que pedimos cuidado y pruebas. Esta gu
    aparezcan textualmente en la fuente.
 4. **Privacidad (Ley 1581 de 2012).** No se guardan IP ni *user agent*, y ningún artículo muestra quién lo pidió.
 5. **Seguridad.** El contenido que se verifica son datos, nunca instrucciones (ver `SECURITY.md`).
-6. **Gratis para todos.** COntraste no cobra. Los límites de uso (al mes y al día) solo cuidan el gasto en modelos.
-7. **Nada de secretos en el repo.** Las claves van en `.env` (ignorado por git); `.env.example` documenta cada una.
+6. **No participamos en la desinformación.** No se aceptan cambios que sirvan para desinformar: generar contenido
+   persuasivo en masa, automatizar la difusión de afirmaciones, mostrar calificaciones que las reglas no sostienen o
+   debilitar las reglas de evidencia. Ver la sección 10 del README.
+7. **Gratis para todos.** COntraste no cobra. Los límites de uso (al mes y al día) solo cuidan el gasto en modelos.
+8. **Nada de secretos en el repo.** Las claves van en `.env` (ignorado por git); `.env.example` documenta cada una.
 
 ## Levantar el proyecto
 

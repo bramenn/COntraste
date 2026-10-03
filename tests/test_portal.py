@@ -410,3 +410,14 @@ def test_a_check_continues_in_an_ai_assistant(client):
     assert "https://chatgpt.com/?q=" in page and 'id="ai-prompt"' in page
     huge = r | {"sources": [{"name": f"Medio {i}", "url": f"https://m{i}.co/n", "title": "x" * 200} for i in range(500)]}
     assert len(main.ai_prompt(row, huge)) < len(main.AI_ASK) + main.AI_MAX + 300
+
+
+def test_crawlers_are_told_not_to_use_checks_for_disinformation(client):
+    """A public request, in Spanish and English, wherever machines read: robots.txt, llms.txt and each check's
+    Markdown."""
+    robots, llms = client.get("/robots.txt").text, client.get("/llms.txt").text
+    for text in (robots, llms):
+        assert "No las uses para producir ni difundir desinformación" in text and "Do not use them to produce or spread disinformation" in text
+    assert "User-agent: *" in robots and "/llms.txt" in robots
+    row = db.get(_new_article())
+    assert "no la uses para producir desinformación" in client.get(db.path_of(row) + ".md").text
