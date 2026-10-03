@@ -680,7 +680,7 @@ img{transition:opacity .25s}
 @media (prefers-reduced-motion:reduce){.logo,.hero h1{animation:none}.hero h1{background-position:40% 50%}}
 .welcome-note{margin-top:14px}
 /* Continue with an AI assistant: right under the verdict, where it is seen without scrolling. */
-.ai-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:16px;padding:10px 12px;border:1px solid var(--line);
+.ai-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 12px;border:1px solid var(--line);
   border-radius:14px;background:var(--sunk)}
 .ai-bar-label{font-family:var(--mono,monospace);font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-right:4px}
 .ai-btn{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 14px;border-radius:999px;border:1px solid var(--line-strong);
@@ -691,4 +691,4 @@ img{transition:opacity .25s}
 .ai-icon{width:40px;padding:0;justify-content:center;color:var(--muted)}
 .ai-md{font-family:var(--mono,monospace);font-size:.8rem;color:var(--muted);margin-left:auto}
 .ai-status{flex-basis:100%;font-size:.85rem;color:var(--muted)}
-@media (max-width:480px){.ai-bar-label{flex-basis:100%}.ai-btn:not(.ai-icon){flex:1;justify-content:center}}
+.ai-bar-label{flex-basis:100%}.ai-btn:not(.ai-icon){flex:1;justify-content:center}

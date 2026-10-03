@@ -2,6 +2,18 @@
 {% from "_m.html" import ui, badge, mark, thumb, plural, STANCE, TIER %}
 {% set label = RATINGS[r.rating] %}
 {% set div = r.diversity or {} %}
+{% macro ai_bar() %}
+    <div class="ai-bar" role="group" aria-labelledby="ai-bar-label">
+      <span class="ai-bar-label" id="ai-bar-label">Profundiza con tu IA</span>
+      <a class="ai-btn ai-chatgpt" href="https://chatgpt.com/?q={{ ai_prompt|urlencode }}" target="_blank" rel="noopener noreferrer" title="Abrir esta verificación en ChatGPT, con la evidencia">{% include "icons/openai.svg" %}<span>ChatGPT</span></a>
+      <a class="ai-btn ai-claude" href="https://claude.ai/new?q={{ ai_prompt|urlencode }}" target="_blank" rel="noopener noreferrer" title="Abrir esta verificación en Claude, con la evidencia">{% include "icons/claude.svg" %}<span>Claude</span></a>
+      <button class="ai-btn ai-icon" type="button" data-copy-ai aria-label="Copiar para otra IA" title="Copiar para otra IA (Gemini, Perplexity…)">{{ ui('copy', 18) }}</button>
+      <button class="ai-btn ai-icon" type="button" data-share-ai hidden aria-label="Compartir con otra app" title="Compartir con otra app">{{ ui('share', 18) }}</button>
+      <a class="ai-md" href="{{ path }}.md" title="Esta verificación en Markdown">.md</a>
+      <template id="ai-prompt">{{ ai_prompt }}</template>
+      <span class="ai-status" id="ai-status" role="status" hidden></span>
+    </div>
+{% endmacro %}
 {% block title %}{{ label }}: {{ r.title }} · COntraste{% endblock %}
 {% block description %}{{ label }}. {{ r.headline|truncate(150) }}{% endblock %}
 {% block head %}
@@ -33,7 +45,7 @@
   <nav class="crumbs" aria-label="Ruta"><a href="/">Inicio</a><span aria-hidden="true">›</span><a href="/archivo?tema={{ row.topic }}">{{ TOPICS[row.topic] }}</a></nav>
   <div class="article-top">
     {% if r.private_person %}
-    <section class="share-card" aria-label="Sin tarjeta para compartir"><p class="note">No hacemos tarjeta para compartir: esta verificación trata sobre una persona que no es figura pública.</p></section>
+    <section class="share-card" aria-label="Sin tarjeta para compartir"><p class="note">No hacemos tarjeta para compartir: esta verificación trata sobre una persona que no es figura pública.</p>{% if r.claims %}{{ ai_bar() }}{% endif %}</section>
     {% else %}
     <section class="share-card" id="share" aria-label="Tarjeta para compartir">
       {% if row.status != 'listed' %}<p class="note warn">Verificación preliminar: {{ row.unlisted_reason or 'no está en portada' }} La tarjeta lo dice.</p>{% endif %}
@@ -54,6 +66,7 @@
         <button type="button" class="btn" id="copy" aria-label="Copiar enlace" title="Copiar enlace">{{ ui('link', 21) }}</button>
       </div>
       <p class="muted" id="copy-status" role="status"></p>
+      {% if r.claims %}{{ ai_bar() }}{% endif %}
     </section>
     {% endif %}
 
@@ -74,18 +87,6 @@
           <span>{{ plural(r.sources|length, 'fuente', 'fuentes') }}</span>
           <span>{% if row.human_reviewed_at %}Revisada por el equipo el {{ format_date(row.human_reviewed_at) }}{% else %}Verificación automatizada con reglas fijas{% endif %}</span>
         </p>
-        {% if r.claims %}
-        <div class="ai-bar" role="group" aria-labelledby="ai-bar-label">
-          <span class="ai-bar-label" id="ai-bar-label">Profundiza con tu IA</span>
-          <a class="ai-btn ai-chatgpt" href="https://chatgpt.com/?q={{ ai_prompt|urlencode }}" target="_blank" rel="noopener noreferrer" title="Abrir esta verificación en ChatGPT, con la evidencia">{% include "icons/openai.svg" %}<span>ChatGPT</span></a>
-          <a class="ai-btn ai-claude" href="https://claude.ai/new?q={{ ai_prompt|urlencode }}" target="_blank" rel="noopener noreferrer" title="Abrir esta verificación en Claude, con la evidencia">{% include "icons/claude.svg" %}<span>Claude</span></a>
-          <button class="ai-btn ai-icon" type="button" data-copy-ai aria-label="Copiar para otra IA" title="Copiar para otra IA (Gemini, Perplexity…)">{{ ui('copy', 18) }}</button>
-          <button class="ai-btn ai-icon" type="button" data-share-ai hidden aria-label="Compartir con otra app" title="Compartir con otra app">{{ ui('share', 18) }}</button>
-          <a class="ai-md" href="{{ path }}.md" title="Esta verificación en Markdown">.md</a>
-          <template id="ai-prompt">{{ ai_prompt }}</template>
-          <span class="ai-status" id="ai-status" role="status" hidden></span>
-        </div>
-        {% endif %}
       </header>
 
       <section class="block" aria-labelledby="h-circula">
