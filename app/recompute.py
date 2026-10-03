@@ -70,9 +70,9 @@ async def main(dry_run: bool):
         if dry_run or json.dumps(r, sort_keys=True) == before:
             continue
         if r["rating"] != old_rating or changed:
-            db.update_article(row["id"], r, old_rating=old_rating, change=("actualizacion", f"{NOTE} {'; '.join(changed)}".strip()))
-            if r["rating"] != old_rating:
+            if r["rating"] != old_rating:  # stamp before saving: saving changes the thumbnail's URL version
                 await cards.restamp(row["id"], r["rating"])
+            db.update_article(row["id"], r, old_rating=old_rating, change=("actualizacion", f"{NOTE} {'; '.join(changed)}".strip()))
         else:
             db.update_article(row["id"], r)
     await cards.close()

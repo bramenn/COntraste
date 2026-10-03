@@ -251,10 +251,15 @@ def _n(k: int, one: str, many: str) -> str:
 
 def focus_rating(claims: list[dict]) -> str:
     """The overall rating follows the central claim, the controversial one the content is about. True side
-    facts (a meeting did take place) must not make "we nearly lost democracy" come out "verdadero". Without
-    a gradable central claim, every claim counts."""
+    facts (a meeting did take place) must not make "we nearly lost democracy" come out "verdadero". Side claims
+    can only make it worse, never better: when extraction marked the true detail as central ("the law bans child
+    marriage") and the false part as a side claim ("De la Espriella's government signed it"), the content is
+    still misleading. Without a gradable central claim, every claim counts."""
     central = [c["rating"] for c in claims if c.get("central") and c["rating"] != "no_verificable"]
-    return overall_rating(central or [c["rating"] for c in claims])
+    if not central:
+        return overall_rating([c["rating"] for c in claims])
+    worse = [c["rating"] for c in claims if not c.get("central") and c["rating"] in ("falso", "enganoso")]
+    return overall_rating(central + worse)
 
 
 def overall_rating(ratings: list[str]) -> str:

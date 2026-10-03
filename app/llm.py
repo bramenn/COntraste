@@ -211,7 +211,9 @@ está en quiebra", "la peor crisis de la historia") se verifica contra los hecho
 opinión, y sus consultas buscan esos hechos, no la frase: quién los vigila o los mide y qué concluyó (por ejemplo,
 para "casi perdimos la democracia en las elecciones": informe de la MOE y de observadores internacionales sobre esas
 elecciones, Registraduría, denuncias de fraude o de golpe; para "el país está en quiebra": deuda y calificación del
-Banco de la República, Ministerio de Hacienda, calificadoras). 'central' es true en la afirmación controvertible que motiva el contenido, normalmente una sola; las demás
+Banco de la República, Ministerio de Hacienda, calificadoras). Lo central es la parte en disputa o dudosa, no el dato de
+contexto que ya es cierto: en "el gobierno de X sancionó la ley Y que prohíbe Z", lo central es quién la sancionó.
+'central' es true en la afirmación controvertible que motiva el contenido, normalmente una sola; las demás
 (quién se reunió con quién, dónde, cuándo) se verifican también, pero son contexto. 'circulating' es la afirmación central tal como circula, en una frase de máximo 110 caracteres; no describas el
 formato (nada de «captura de X», «video de», «tuit que dice»).
 'topic' es la sección periodística principal: justicia (procesos judiciales, fiscalía, cortes, cárceles),
@@ -295,7 +297,10 @@ def _parse(content: str, model_cls):
 async def _complete(messages: list, model: str, fast: bool = False) -> str:
     if not settings.OPENROUTER_API_KEY or not model:
         raise LLMError("Falta configurar OPENROUTER_API_KEY y OPENROUTER_MODEL en el archivo .env.")
-    body = {"model": model, "messages": messages, "temperature": 0.1,
+    # A stage can name several models, "free:model,paid-model": OpenRouter tries them in order when one is rate
+    # limited or down, so a saturated free model never stops a check.
+    models = [m.strip() for m in model.split(",") if m.strip()]
+    body = {"model": models[0], "messages": messages, "temperature": 0.1,
             # Explicit max_tokens: without it OpenRouter reserves the model maximum (65k), and a key with a
             # spending limit gets a 402 even when there is credit left. Reasoning models spend part of it
             # thinking, so the main model gets more room.
@@ -303,6 +308,8 @@ async def _complete(messages: list, model: str, fast: bool = False) -> str:
             "response_format": {"type": "json_object"},
             "provider": {"require_parameters": True},  # only providers that honour JSON mode
             "usage": {"include": True}}  # have OpenRouter report the real cost of each call
+    if len(models) > 1:
+        body["models"] = models
     if fast:
         # Reading one source is a simple task; reasoning made it 3x slower in tests with no gain.
         body["reasoning"] = {"enabled": False}
@@ -324,7 +331,7 @@ async def _complete(messages: list, model: str, fast: bool = False) -> str:
     u = data.get("usage") or {}
     db.add_spend(float(u.get("cost") or 0), JOB.get())
     if (records := USAGE.get()) is not None:
-        records.append({"model": model, "stage": _STAGE.get(), "usd": float(u.get("cost") or 0),
+        records.append({"model": data.get("model") or models[0], "stage": _STAGE.get(), "usd": float(u.get("cost") or 0),
                         "prompt_tokens": int(u.get("prompt_tokens") or 0),
                         "completion_tokens": int(u.get("completion_tokens") or 0)})
     return content

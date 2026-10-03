@@ -441,6 +441,9 @@ def test_the_central_claim_decides_the_overall_rating():
     assert focus_rating([c | {"central": False} for c in claims]) == "enganoso"
     assert focus_rating(claims[:2] + [{"rating": "no_verificable", "central": True}]) == "verdadero"
     assert focus_rating(claims[:2]) == "verdadero"
+    # A false side claim makes it worse, never a true one better: the law exists, but the wrong government signed it.
+    law = [{"rating": "verdadero", "central": True}, {"rating": "falso", "central": False}]
+    assert focus_rating(law) == "enganoso"
 
 
 def test_the_model_standard_cases_are_well_formed():
@@ -460,3 +463,23 @@ def test_the_model_standard_cases_are_well_formed():
         assert c["kind"] <= kinds, c["id"]
     assert all(c["lines"] for c in cases.IMAGES)
     assert len({c["id"] for c in cases.SOURCES}) == len(cases.SOURCES)
+
+
+def test_a_stage_can_fall_back_to_another_model(monkeypatch):
+    """"free:model,paid-model": OpenRouter tries the next when one is saturated, so a free model never stops a
+    check; the cost table records the model that answered."""
+    from app import llm
+    sent = []
+
+    async def post(body):
+        sent.append(body)
+        return httpx.Response(200, json={"model": "deepseek/deepseek-v4-flash", "usage": {"cost": 0.001},
+                                         "choices": [{"message": {"content": "{}"}}]})
+    monkeypatch.setattr(llm, "_post", post)
+    records = []
+    llm.USAGE.set(records)
+    asyncio.run(llm._complete([{"role": "user", "content": "x"}], "nvidia/nemotron:free, deepseek/deepseek-v4-flash", fast=True))
+    assert sent[0]["model"] == "nvidia/nemotron:free" and sent[0]["models"] == ["nvidia/nemotron:free", "deepseek/deepseek-v4-flash"]
+    assert records[0]["model"] == "deepseek/deepseek-v4-flash"
+    asyncio.run(llm._complete([{"role": "user", "content": "x"}], "deepseek/deepseek-v4-pro"))
+    assert "models" not in sent[1]

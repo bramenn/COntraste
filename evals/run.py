@@ -48,12 +48,22 @@ def _norm(s: str) -> str:
     return " ".join("".join(ch for ch in s if ch.isalnum() or ch.isspace()).split())
 
 
+THROTTLED = [0]
+
+
 async def _call(task, data, cls, **kw):
+    """One model, no fallback. Free models share a pool and answer 429 when it is saturated: that is
+    availability, not quality, so the call waits and retries (and the report counts it)."""
     t0 = time.perf_counter()
-    try:
-        return await llm.ask(task, data, cls, **kw), time.perf_counter() - t0
-    except llm.LLMError:
-        return None, time.perf_counter() - t0
+    for attempt in range(6):
+        try:
+            return await llm.ask(task, data, cls, **kw), time.perf_counter() - t0
+        except llm.LLMError as e:
+            if "429" not in str(e) or attempt == 5:
+                return None, time.perf_counter() - t0
+            THROTTLED[0] += 1
+            await asyncio.sleep(20)
+            t0 = time.perf_counter()
 
 
 async def fuentes(case):
@@ -153,6 +163,7 @@ async def evaluate(stage: str, model: str) -> dict:
     passed = not critical and all(score[k] >= v for k, v in bar.items())
     return {"stage": stage, "model": model, "date": datetime.now().date().isoformat(), "score": score, "bar": bar,
             "critical": critical, "passed": passed, "usd": round(sum(SPENT), 4), "latency_p50": round(statistics.median(lat), 1),
+            "throttled": THROTTLED[0],
             "cases": [{"id": row["case"]["id"], "answers": [[m["answer"] for m in run] if run else "formato inválido"
                                                              for run in row["runs"]]} for row in rows]}
 
@@ -160,7 +171,8 @@ async def evaluate(stage: str, model: str) -> dict:
 def report(res: dict) -> str:
     s, b = res["score"], res["bar"]
     lines = [f"## {res['stage']} · `{res['model']}` · {res['date']}", "",
-             f"**{'ELEGIBLE' if res['passed'] else 'NO ELEGIBLE'}** · costo de la prueba US${res['usd']} · latencia mediana {res['latency_p50']} s", "",
+             f"**{'ELEGIBLE' if res['passed'] else 'NO ELEGIBLE'}** · costo de la prueba US${res['usd']} · latencia mediana {res['latency_p50']} s"
+             f" · saturado (429) {res['throttled']} veces", "",
              "| Métrica | Resultado | Mínimo |", "|---|---|---|"]
     lines += [f"| {k} | {s[k]:.0%} | {b[k]:.0%} |" for k in b]
     lines.append(f"| errores críticos | {', '.join(res['critical']) or 'ninguno'} | ninguno |")
@@ -174,6 +186,8 @@ def main():
     p.add_argument("--stage", required=True, choices=list(STAGES))
     p.add_argument("--model", required=True)
     a = p.parse_args()
+    if "," in a.model:
+        sys.exit("El estándar evalúa un solo modelo por corrida, sin respaldo.")
     if not settings.OPENROUTER_API_KEY:
         sys.exit("Falta OPENROUTER_API_KEY.")
     res = asyncio.run(evaluate(a.stage, a.model))

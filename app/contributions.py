@@ -219,9 +219,9 @@ async def _apply(aid: str, row: dict, old: dict, new: dict, note: str = ACCEPTED
     status, reason = publish_decision(new)
     if row["status"] == "removed":
         status, reason = "removed", row["unlisted_reason"]
-    db.update_article(aid, new, status=status, reason=reason, old_rating=old["rating"], change=("aporte", note))
-    if new["rating"] != old["rating"]:
+    if new["rating"] != old["rating"]:  # stamp before saving: saving changes the thumbnail's URL version
         await cards.restamp(aid, new["rating"])
+    db.update_article(aid, new, status=status, reason=reason, old_rating=old["rating"], change=("aporte", note))
 
 
 async def approve(cid: str) -> bool:

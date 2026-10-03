@@ -204,9 +204,9 @@ async def act(request: Request, aid: str, action: str):
             if form.get(f"claim_rating_{i}") in RATINGS:
                 c["rating"] = form[f"claim_rating_{i}"]
             c["explanation"] = str(form.get(f"claim_explanation_{i}", c["explanation"]))[:1000]
-        db.update_article(aid, new, change=("correccion", str(form["note"]).strip()[:500]), old_rating=r["rating"])
-        if new["rating"] != r["rating"]:
+        if new["rating"] != r["rating"]:  # stamp before saving: saving changes the thumbnail's URL version
             await cards.restamp(aid, new["rating"])
+        db.update_article(aid, new, change=("correccion", str(form["note"]).strip()[:500]), old_rating=r["rating"])
     elif action == "reinvestigate":
         spawn(reinvestigate(aid))
     elif action == "reviewed":

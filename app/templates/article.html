@@ -100,7 +100,7 @@
         {% endif %}
         {% if r.media.thumb or r.media.original_url %}
         <div class="media">
-          {% if r.media.thumb %}<img src="/media/{{ r.media.thumb }}" alt="Miniatura del contenido original con el sello {{ label }} y rostros difuminados">{% endif %}
+          {% if r.media.thumb %}<img src="{{ media_url(row, r.media.thumb) }}" alt="Miniatura del contenido original con el sello {{ label }} y rostros difuminados">{% endif %}
           {% if r.media.original_url %}<p>Original: <a href="{{ r.media.original_url }}" rel="nofollow noopener ugc" target="_blank">{{ r.media.original_url|truncate(48) }}</a><br>No lo volvemos a publicar para no amplificarlo.</p>{% endif %}
         </div>
         {% endif %}

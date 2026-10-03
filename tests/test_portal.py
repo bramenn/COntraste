@@ -436,3 +436,17 @@ def test_samples_are_stories_that_divide_the_country():
     assert news.example() == "Jesús Mauricio Castañeda es el nuevo contralor de Cali"
     db.q("DELETE FROM app_settings WHERE key='trending'")
     news._cache = (0.0, [])
+
+
+def test_thumbnail_urls_change_with_the_rating(client):
+    """A re-investigation changed a rating and readers kept seeing the old band: the thumbnail URL was fixed and
+    Cloudflare told browsers to keep it four hours. It is versioned now, like the cards."""
+    from app import main
+    row = db.get(_new_article())
+    first = main.media_url(row, "x.jpg")
+    db.q("UPDATE articles SET updated_at=%s WHERE id=%s", db.iso(db.now() + __import__("datetime").timedelta(minutes=5)), row["id"])
+    assert main.media_url(db.get(row["id"]), "x.jpg") != first and first.startswith("/media/x.jpg?v=")
+    db.media_put(row["id"] + ".jpg", b"\xff\xd8 imagen")
+    versioned = client.get(main.media_url(db.get(row["id"]), row["id"] + ".jpg"))
+    assert versioned.status_code == 200 and "immutable" in versioned.headers["cache-control"]
+    assert "immutable" not in client.get(f"/media/{row['id']}.jpg").headers["cache-control"]

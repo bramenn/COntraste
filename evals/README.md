@@ -52,7 +52,17 @@ pip install -r requirements.txt
 OPENROUTER_API_KEY=sk-or-... python -m evals.run --stage fuentes --model qwen/qwen3.8-27b:free
 ```
 
+Los modelos gratuitos comparten un cupo y a ratos responden «saturado» (error 429). Eso es disponibilidad, no calidad: la prueba espera y reintenta, y el informe dice cuántas veces pasó. En producción, un modelo gratuito siempre va con un respaldo de pago (ver abajo).
+
 Imprime el informe, dice si el modelo es **ELEGIBLE**, y lo guarda en `evals/results/` en Markdown y JSON. Cada corrida cuesta centavos de dólar (los modelos gratuitos, nada).
+
+## Modelos gratuitos y respaldo
+
+Un modelo gratuito puede usarse si pasa el estándar, pero **siempre con un respaldo** que también lo haya pasado: cada variable acepta una lista separada por comas, y OpenRouter prueba el siguiente cuando uno está saturado o caído. Por ejemplo:
+
+```
+OPENROUTER_FAST_MODEL=nvidia/nemotron-3-super-120b-a12b:free,deepseek/deepseek-v4-flash
+```
 
 ## Proponer un modelo
 

@@ -32,12 +32,19 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name
 log = logging.getLogger("contraste")
 
 TOPICS = llm.TOPICS
+def media_url(row, name: str) -> str:
+    """Versioned like the cards: the stamped thumbnail changes when the rating does, and a fixed URL let browsers
+    and Cloudflare keep showing the old band for hours after a re-investigation changed it."""
+    v = hashlib.sha1(f"{row['rating']}|{row['updated_at']}".encode()).hexdigest()[:10]
+    return f"/media/{name}?v={v}"
+
+
 def image_of(row) -> dict:
     """Listing image for an article: the stamped thumbnail of the original if there is one, otherwise
     its cover card. Never the unstamped original."""
     thumb = (json.loads(row["result"]).get("media") or {}).get("thumb")
     if thumb:
-        return {"src": f"/media/{thumb}", "original": True,
+        return {"src": media_url(row, thumb), "original": True,
                 "alt": f"Miniatura del contenido original con el sello {RATINGS[row['rating']]} y rostros difuminados"}
     return {"src": cards.card_url(row, "cover"), "alt": "", "original": False}
 
@@ -76,7 +83,7 @@ def asset(name: str) -> str:
     return f"/static/{name}?v={hashlib.sha1((settings.APP_DIR / 'static' / name).read_bytes()).hexdigest()[:10]}"
 
 
-cards.env.globals.update(topics_in_use=topics_in_use, memoria_highlights=memoria.highlights, news_example=news.example, asset=asset, ticker=ticker, markets=markets.current, market_value=markets.show, TURNSTILE=settings.TURNSTILE_SITE_KEY, free_credits=credits.free_monthly,
+cards.env.globals.update(media_url=media_url, topics_in_use=topics_in_use, memoria_highlights=memoria.highlights, news_example=news.example, asset=asset, ticker=ticker, markets=markets.current, market_value=markets.show, TURNSTILE=settings.TURNSTILE_SITE_KEY, free_credits=credits.free_monthly,
                          daily_limit=credits.daily_limit, renews_on=credits.renews_on, SOURCE_URL=settings.SOURCE_URL, GOOGLE=bool(settings.GOOGLE_OAUTH_CLIENT_ID),
                          TOPICS=TOPICS, path_of=db.path_of, DEMO=settings.DEMO_MODE, BASE=settings.PUBLIC_BASE_URL,
                          image_of=image_of)
@@ -336,11 +343,13 @@ async def reinvestigate(aid: str) -> None:
             status, reason = publish_decision(new)
             if row["status"] == "removed":
                 status, reason = "removed", row["unlisted_reason"]
+            # Stamp first, then save: the saved article changes the thumbnail's URL version, which must never
+            # point at the old band (browsers keep a versioned image for a year).
+            if new["rating"] != old["rating"]:
+                await cards.restamp(aid, new["rating"])
             db.update_article(aid, new, status=status, reason=reason, old_rating=old["rating"],
                               change=("actualizacion", "Se encontró nueva evidencia." if new["rating"] != old["rating"]
                                       else "Se actualizaron las fuentes con el método actual; la calificación general no cambió."))
-            if new["rating"] != old["rating"]:
-                await cards.restamp(aid, new["rating"])
         else:
             old["last_checked"] = db.iso()
             old["usage"] = llm.merge_usage(old.get("usage"), new.get("usage"))
@@ -724,13 +733,15 @@ async def card(aid: str, fmt: str):
 
 
 @app.get("/media/{name}")
-def media(name: str):
+def media(name: str, request: Request):
     m = re.fullmatch(r"([a-z0-9]{6})\.jpg", name)
     row = db.get(m.group(1)) if m else None
     item = db.media_get(name) if row and row["status"] != "removed" else None
     if not item:
         return Response(status_code=404)
-    return Response(bytes(item["data"]), media_type=item["mime"], headers={"Cache-Control": "public, max-age=300"})
+    versioned = "v" in request.query_params  # the version changes with the image: it can be kept a year
+    return Response(bytes(item["data"]), media_type=item["mime"],
+                    headers={"Cache-Control": "public, max-age=31536000, immutable" if versioned else "public, max-age=300"})
 
 
 BOT_UA = re.compile(r"bot|crawl|spider|slurp|headless|phantom|puppeteer|playwright|selenium|lighthouse|curl|wget|"
