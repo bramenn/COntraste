@@ -94,6 +94,7 @@
 {% if not user %}
 <dialog class="login-dialog" id="login-dialog" aria-labelledby="login-title">
   <h2 id="login-title">Crea tu cuenta para verificar esto</h2>
+  <p class="note" id="login-why" hidden></p>
   <p>Te damos {{ free_credits() }} verificaciones gratis cada mes. Guardamos lo que escribiste.</p>
   {% include "_login.html" %}
   <form method="dialog"><button class="btn">Ahora no</button></form>

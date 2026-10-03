@@ -178,7 +178,7 @@ async def run_job(job: dict):
             await emit("Preparando la tarjeta", 94)
             url = await finalize(result, keys | {k: v for k, v in k2.items() if v}, thumb, job_id)
         aid = url.rsplit("-", 1)[-1]
-        db.job_finish(job_id, done_event(aid), article_id=aid)
+        db.job_finish(job_id, done_event(aid, anon=bool(inp.get("anon"))), article_id=aid)
         if not settings.DEMO_MODE:
             try:
                 from .contributions import cross_from
@@ -531,9 +531,36 @@ async def page_changed(url: str, aid: str) -> bool:
     return bool(set(fingerprint(page["text"])) - set(old))
 
 
-REFUNDED = "No se descontó de tu saldo."
+REFUNDED = "No se descontó de tus verificaciones."
 PAUSED = "Pausamos las verificaciones nuevas por hoy. Puedes consultar todo el archivo."
 PER_USER_OPEN = 2   # checks one account can have queued or running at once
+ANON_USED = ("Ya hiciste tu verificación sin cuenta de hoy. Crea tu cuenta gratis: tienes {n} verificaciones al mes "
+             "y guardas tu historial.")
+ANON_SPENT = ("Las verificaciones sin cuenta de hoy se agotaron. Crea tu cuenta gratis para seguir: tienes {n} "
+              "verificaciones al mes.")
+
+
+async def anonymous_check(request: Request, inp: dict, keys: dict, image_png, captcha: str):
+    """One check a day without an account, to try COntraste before signing up. Captcha required; counted per
+    visitor with the daily salted hash (no IP is stored); all of them together use at most ANON_SHARE of the
+    day's model budget. Every time someone is asked to sign up it is counted, to measure the friction."""
+    if not await accounts.turnstile_ok(captcha, request, "check"):
+        return JSONResponse({"error": "No pudimos confirmar que no eres un robot. Intenta de nuevo."}, status_code=400)
+    cap = settings.DAILY_SPEND_LIMIT_USD
+    if cap and db.spend_today() >= cap:
+        return JSONResponse({"error": PAUSED}, status_code=503)
+    job_id = db.new_id()
+    n = credits.free_monthly()
+    if not credits.anon_budget_left():
+        db.bump("login_prompt")
+        return JSONResponse({"error": "login_required", "message": ANON_SPENT.format(n=n)}, status_code=401)
+    if not credits.anon_claim(db.visitor_hash(client_ip(request), "", "anon-check"), job_id):
+        db.bump("login_prompt")
+        return JSONResponse({"error": "login_required", "message": ANON_USED.format(n=n)}, status_code=401)
+    db.job_create(job_id, inp | {"keys": keys, "anon": True}, image_png)
+    db.bump("anon_check")
+    _wake.set()
+    return {"id": job_id, "position": db.job_position(job_id)}
 
 
 @app.post("/api/checks")
@@ -589,10 +616,12 @@ async def create_check(request: Request, url: str | None = Form(None), text: str
         maybe_reinvestigate(dup)
         return {"id": dup, "url": db.path_of(db.get(dup)), "duplicate": True}
 
-    # Something new: from here on it costs a credit and needs an account.
+    # Something new: from here on it costs a check.
+    if keys.get("emb"):
+        keys["emb"] = base64.b64encode(keys["emb"]).decode()
     user = accounts.CURRENT_USER.get()
     if not user:
-        return JSONResponse({"error": "login_required"}, status_code=401)
+        return await anonymous_check(request, inp, keys, image_png, captcha)
     if not accounts.csrf_ok(request, request.headers.get("x-csrf")):
         return JSONResponse({"error": "Tu sesión venció. Recarga la página."}, status_code=403)
     if not await accounts.turnstile_ok(captcha, request, "check"):
@@ -618,14 +647,13 @@ async def create_check(request: Request, url: str | None = Form(None), text: str
     except credits.NoCredits:
         from .survey import no_credits_response
         return no_credits_response(user)
-    if keys.get("emb"):
-        keys["emb"] = base64.b64encode(keys["emb"]).decode()
     try:
         db.job_create(job_id, inp | {"keys": keys}, image_png, user_id=user["id"])
     except Exception:
         credits.refund(job_id)
         raise
     remaining = credits.balances(user)["total"]
+    db.bump("check")
     _wake.set()
     return {"id": job_id, "position": db.job_position(job_id), "remaining": remaining}
 

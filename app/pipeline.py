@@ -48,14 +48,14 @@ ADJUSTED_LINE = {"sin_pruebas": "Sin pruebas suficientes: {}", "enganoso": "Impr
 
 CHECKABLE = {"afirmacion", "pregunta_sobre_hecho", "opinion_o_satira_publica"}
 # Every rejection says what we found and whether the verification was charged. Rule: if we stop before any costly
-# analysis it is not charged (run_job adds "No se descontó de tu saldo"); once the image was read or the main model
+# analysis it is not charged (run_job adds "No se descontó de tus verificaciones"); once the image was read or the main model
 # ran, it is charged (Charged) and the message says why.
 NOT_A_CLAIM = ("No lo verificamos: no encontramos nada que se presente como un hecho. COntraste verifica noticias, "
                "rumores, titulares, cifras y mensajes sobre asuntos públicos; no responde preguntas generales ni hace tareas.")
 NOT_RELATED = ("No lo verificamos: parece un asunto local de otro país, sin relación con Colombia ni con temas que "
                "afecten a cualquiera (salud, ciencia, tecnología, estafas, hechos internacionales de gran alcance).")
-CHARGED_IMAGE = "Leer la imagen ya tuvo un costo, así que esta verificación se descontó de tu saldo."
-CHARGED_ANALYSIS = "Analizarlo ya usó nuestro modelo de análisis, así que esta verificación se descontó de tu saldo."
+CHARGED_IMAGE = "Leer la imagen ya tuvo un costo, así que esta verificación se descontó de tus verificaciones."
+CHARGED_ANALYSIS = "Analizarlo ya usó nuestro modelo de análisis, así que esta verificación se descontó de tus verificaciones."
 KIND_REASON = {
     "pregunta_general": "parece una pregunta general o una tarea (una traducción, un cálculo, cómo hacer algo)",
     "conversacion": "parece un saludo o una conversación",

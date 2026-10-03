@@ -98,7 +98,10 @@ def test_6_already_verified_needs_no_account_and_no_credits(web, fake_llm):
         r = anon.post("/api/checks", data={"text": "El puente de la calle 80 fue reabierto"})
         assert r.status_code == 200 and r.json()["duplicate"] and r.json()["url"].startswith("/v/")
         new = anon.post("/api/checks", data={"text": "Una afirmación totalmente distinta que nadie ha verificado"})
-        assert new.status_code == 401 and new.json()["error"] == "login_required"
+        assert new.status_code == 200 and new.json()["id"]                         # the day's check without an account
+        again = anon.post("/api/checks", data={"text": "Otra afirmación distinta que tampoco se ha verificado"})
+        assert again.status_code == 401 and again.json()["error"] == "login_required"
+        assert "Ya hiciste tu verificación sin cuenta de hoy" in again.json()["message"]
     assert total(user) == before
 
 
@@ -321,7 +324,7 @@ def test_gate_rejection_gives_the_credit_back(monkeypatch, no_free):
         user = sign_in(c, extra=1)
         job = wait_job(c.post("/api/checks", data={"text": "haz la funcion fibo en python, porfa"}).json()["id"])
     assert job["status"] == "error" and job["error"].startswith("No lo verificamos")
-    assert job["error"].endswith("No se descontó de tu saldo.")       # the reason, then that it was not charged
+    assert job["error"].endswith("No se descontó de tus verificaciones.")       # the reason, then that it was not charged
     assert total(user) == 1
 
 
@@ -347,5 +350,29 @@ def test_an_image_with_nothing_to_check_is_charged_and_says_why(monkeypatch, no_
         r = c.post("/api/checks", files={"image": ("almuerzo.png", buf.getvalue(), "image/png")})
         job = wait_job(r.json()["id"])
     assert "En tu imagen vimos: «Un plato de arroz con pollo" in job["error"]
-    assert "Leer la imagen ya tuvo un costo" in job["error"] and "se descontó de tu saldo" in job["error"]
+    assert "Leer la imagen ya tuvo un costo" in job["error"] and "se descontó de tus verificaciones" in job["error"]
     assert total(user) == 0
+
+
+def test_without_an_account_one_check_a_day_refunded_if_rejected_and_capped_together(monkeypatch):
+    """Trying COntraste needs no account: one check a day per visitor (no IP stored), given back if we reject
+    it before spending, and all of them together use at most a quarter of the day's model budget."""
+    async def rejected(inp, emit, **kw):
+        raise main.UserError("No lo verificamos: prueba.")
+    monkeypatch.setattr(main, "investigate", rejected)
+    db.q("DELETE FROM anon_checks"); db.q("DELETE FROM metrics_daily")
+    with TestClient(app) as anon:
+        r = anon.post("/api/checks", data={"text": "Primera afirmación sin cuenta que se rechazará"})
+        assert r.status_code == 200
+        assert wait_job(r.json()["id"])["error"].endswith("No se descontó de tus verificaciones.")
+        r = anon.post("/api/checks", data={"text": "Segunda afirmación sin cuenta después del rechazo"})
+        assert r.status_code == 200                                  # the rejected one was given back
+        wait_job(r.json()["id"])
+        assert db.q1("SELECT COUNT(*) AS n FROM anon_checks")["n"] == 0
+        monkeypatch.setattr(settings, "DAILY_SPEND_LIMIT_USD", 1.0)
+        db.q("UPDATE jobs SET cost_usd=0.3 WHERE input->>'anon' = 'true'")   # past 25 % of US$1
+        r = anon.post("/api/checks", data={"text": "Tercera afirmación cuando el cupo sin cuenta se agotó"})
+        assert r.status_code == 401 and "se agotaron" in r.json()["message"]
+    m = {r["name"]: r["n"] for r in db.q("SELECT name, n FROM metrics_daily")}
+    assert m["anon_check"] == 2 and m["login_prompt"] == 1
+    db.q("DELETE FROM jobs WHERE input->>'anon' = 'true'")

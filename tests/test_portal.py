@@ -172,7 +172,7 @@ def test_an_edited_page_is_not_covered_by_its_old_verdict(client, web, fake_llm,
     assert r.json().get("duplicate"), r.text                                        # unchanged: old verdict
     web[url] = article(fact + " Además, el alcalde anunció que regalará bicicletas a todos los habitantes.")
     r = client.post("/api/checks", data={"url": url})
-    assert r.status_code == 401, r.text                                             # edited: needs a new check
+    assert r.status_code == 200 and not r.json().get("duplicate"), r.text           # edited: a new check (the day's one without an account)
 
 
 def test_articles_show_how_they_were_researched_and_accept_replies(client, web, fake_llm):

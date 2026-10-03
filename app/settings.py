@@ -26,7 +26,7 @@ WHISPER_MODEL = env("WHISPER_MODEL", "small")
 MAX_VIDEO_MINUTES = float(env("MAX_VIDEO_MINUTES", "10"))
 PUBLIC_BASE_URL = env("PUBLIC_BASE_URL", "http://localhost:8080").rstrip("/")
 # AGPL-3.0: whoever runs Contraste as a service offers its source to the people using it. Point this at yours.
-SOURCE_URL = env("SOURCE_URL", "https://github.com/bramenn/contraste")
+SOURCE_URL = env("SOURCE_URL", "https://github.com/bramenn/COntraste")
 DEMO_MODE = env("DEMO_MODE", "false").lower() in ("1", "true", "yes", "si", "sí")
 
 MAX_TEXT_CHARS = 3000

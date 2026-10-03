@@ -104,12 +104,32 @@ def spend(user: dict, ref: str) -> str:
         raise NoCredits()
 
 
+ANON_SHARE = 0.25  # share of the day's model budget that checks without an account can use, all together
+
+
+def anon_claim(visitor: str, job_id: str) -> bool:
+    """The one check a day without an account. False if this visitor already used today's."""
+    return bool(db.q1("""INSERT INTO anon_checks VALUES(%s,%s,%s) ON CONFLICT DO NOTHING RETURNING job_id""",
+                      db.today_co().date().isoformat(), visitor, job_id))
+
+
+def anon_budget_left() -> bool:
+    """Checks without an account share ANON_SHARE of the day's model budget: abuse can use that up, never
+    the checks of people with an account."""
+    cap = settings.DAILY_SPEND_LIMIT_USD * ANON_SHARE
+    start = db.today_co().replace(hour=0, minute=0, second=0, microsecond=0)
+    spent = db.q1("SELECT COALESCE(SUM(cost_usd), 0) AS usd FROM jobs WHERE input->>'anon' = 'true' AND created_at >= %s",
+                  start)["usd"]
+    return not cap or spent < cap
+
+
 def refund(ref: str, note: str = "Devolución por error del sistema") -> bool:
-    """Give back the credit spent on `ref`, into the same bucket and month. At most once."""
+    """Give back the credit spent on `ref`, into the same bucket and month, or the day's check without an
+    account. At most once."""
     with db.pool.connection() as c, c.transaction():
         row = c.execute("SELECT * FROM credit_ledger WHERE kind='spend' AND ref=%s", (ref,)).fetchone()
         if not row:
-            return False
+            return bool(c.execute("DELETE FROM anon_checks WHERE job_id=%s", (ref,)).rowcount)
         return _add(c, row["user_id"], "refund", row["bucket"], 1, ref, note, row["month"])
 
 

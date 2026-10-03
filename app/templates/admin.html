@@ -91,6 +91,12 @@
     {% if spend.paused %}Las verificaciones nuevas están pausadas hasta mañana.{% endif %}</p>
   <p>Costo real promedio por verificación (30 días, {{ avg.n }}): <b>{{ usd(avg.usd) }}</b>.</p>
 
+  <h2 class="mt-s">Fricción de la cuenta (últimos 14 días)</h2>
+  <p class="muted">«Se le pidió cuenta»: alguien quiso verificar y le pedimos crear una cuenta (ya usó la del día sin cuenta, o se agotó el cupo sin cuenta). Si ese número es alto frente a «Cuentas nuevas», la cuenta está espantando gente.</p>
+  {% if metrics %}<table><tr><th>Día</th><th>Sin cuenta</th><th>Se le pidió cuenta</th><th>Cuentas nuevas</th><th>Con cuenta</th></tr>{% for day, m in metrics.items() %}
+    <tr><td>{{ day }}</td><td>{{ m.anon_check or 0 }}</td><td>{{ m.login_prompt or 0 }}</td><td>{{ m.signup or 0 }}</td><td>{{ m.check or 0 }}</td></tr>{% endfor %}</table>
+  {% else %}<p class="muted">Todavía no hay datos.</p>{% endif %}
+
   <h2 class="mt-s">Aportes por decidir</h2>
   <p class="muted">«Congelado»: llegaron muchos aportes seguidos al mismo artículo. «Cambia la calificación» o «sitio sin catalogar»: la máquina ya investigó y el resultado espera tu visto bueno. Abre las fuentes con cuidado: las envió un lector.</p>
   {% if frozen %}<table><tr><th>Artículo</th><th>Estado</th><th>Fuentes</th><th>Nota (no publicada)</th><th></th></tr>{% for c in frozen %}

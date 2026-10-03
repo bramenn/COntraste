@@ -125,6 +125,13 @@ CREATE TABLE IF NOT EXISTS leases(name TEXT PRIMARY KEY, holder TEXT NOT NULL, u
 CREATE TABLE IF NOT EXISTS app_settings(key TEXT PRIMARY KEY, value JSONB NOT NULL);
 
 -- One answer per account. On account deletion user_id becomes NULL and the answer stays anonymous.
+-- One check a day without an account, per visitor. visitor is the salted daily hash (no IP); rows of
+-- past days are deleted.
+CREATE TABLE IF NOT EXISTS anon_checks(day TEXT NOT NULL, visitor TEXT NOT NULL, job_id TEXT NOT NULL,
+  PRIMARY KEY (day, visitor));
+-- Daily counters, no personal data: how many were asked to sign up, checked without an account, signed up.
+CREATE TABLE IF NOT EXISTS metrics_daily(day TEXT NOT NULL, name TEXT NOT NULL, n INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (day, name));
 CREATE TABLE IF NOT EXISTS surveys(id BIGSERIAL PRIMARY KEY, user_id TEXT UNIQUE, answers JSONB NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now());
 """
@@ -305,6 +312,12 @@ def daily_salt() -> str:
     return q1("SELECT salt FROM salts WHERE day=%s", day)["salt"]
 
 
+def bump(name: str):
+    """Count one event of today (Colombian day) in metrics_daily."""
+    q("""INSERT INTO metrics_daily VALUES(%s,%s,1)
+         ON CONFLICT (day, name) DO UPDATE SET n = metrics_daily.n + 1""", today_co().date().isoformat(), name)
+
+
 def visitor_hash(ip: str, ua: str, aid: str) -> str:
     return hashlib.sha256(f"{ip}|{ua}|{aid}|{daily_salt()}".encode()).hexdigest()
 
@@ -447,6 +460,7 @@ def jobs_cleanup(days: int = 7):
     q("DELETE FROM rate_hits WHERE at < now() - interval '1 day'")
     q("DELETE FROM view_rejected WHERE at < %s", iso(now() - timedelta(days=days)))
     q("DELETE FROM consult_seen WHERE day < %s", now().date().isoformat())
+    q("DELETE FROM anon_checks WHERE day < %s", today_co().date().isoformat())
 
 
 # --- Front page and ranking ----------------------------------------------------------------

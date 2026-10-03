@@ -1,4 +1,5 @@
 """Editor panel: a single password from .env (bcrypt), no user accounts."""
+from datetime import timedelta
 import copy
 import json
 import secrets
@@ -63,7 +64,12 @@ def business(request: Request, msg: str = ""):
                      FROM contributions c JOIN articles a ON a.id=c.article_id LEFT JOIN articles o ON o.id=c.origin
                      WHERE c.status IN ('frozen', 'review') ORDER BY c.created_at""")
     from . import auto, credits, survey
-    return _page("admin.html", view="business", csrf=csrf, spend=spend_status(), avg=avg, frozen=frozen, msg=msg,
+    since = (db.today_co() - timedelta(days=13)).date().isoformat()
+    rows = db.q("SELECT day, name, n FROM metrics_daily WHERE day >= %s ORDER BY day DESC", since)
+    metrics = {}
+    for r in rows:
+        metrics.setdefault(r["day"], {})[r["name"]] = r["n"]
+    return _page("admin.html", view="business", metrics=metrics, csrf=csrf, spend=spend_status(), avg=avg, frozen=frozen, msg=msg,
                  free_n=credits.free_monthly(), daily_n=credits.daily_limit(), survey_reward=survey.reward_amount(),
                  auto_n=auto.per_day())
 

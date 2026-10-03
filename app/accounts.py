@@ -112,8 +112,9 @@ def get_or_create_user(req: Request, email: str, consent: bool) -> tuple[dict | 
     if ip_limited(req, "signup", 3, 86400):
         return None, "Se crearon demasiadas cuentas desde esta conexión hoy. Intenta mañana."
     uid = "u" + secrets.token_hex(8)
-    db.q("""INSERT INTO users(id, email, email_verified, consent_at, disposable) VALUES(%s,%s,TRUE, now(), %s)
-            ON CONFLICT (email) DO NOTHING""", uid, email, is_disposable(email))
+    if db.q1("""INSERT INTO users(id, email, email_verified, consent_at, disposable) VALUES(%s,%s,TRUE, now(), %s)
+               ON CONFLICT (email) DO NOTHING RETURNING id""", uid, email, is_disposable(email)):
+        db.bump("signup")
     return db.q1("SELECT * FROM users WHERE email=%s", email), None
 
 

@@ -1,5 +1,5 @@
 blank_issues_enabled: false
 contact_links:
   - name: Reportar una vulnerabilidad
-    url: https://github.com/bramenn/contraste/security/advisories/new
+    url: https://github.com/bramenn/COntraste/security/advisories/new
     about: En privado, nunca en un issue público. Ver SECURITY.md.

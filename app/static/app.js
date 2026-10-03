@@ -46,9 +46,9 @@
     const done = (t) => { resolve(t); setTimeout(() => box.remove(), 0); };
     window.turnstile.render(box, { sitekey: TS, action, appearance: "interaction-only", callback: done, "error-callback": () => done("") });
   });
-  // POST as the signed-in user. The captcha is only asked for when an account is involved.
+  // POST, with the captcha (checks without an account need it as much as signed-in ones).
   const post = async (url, fd, withCaptcha = true, onSent) => {
-    if (withCaptcha && CSRF) fd.set("cf-turnstile-response", await captcha("check"));
+    if (withCaptcha) fd.set("cf-turnstile-response", await captcha("check"));
     if (onSent) onSent();  // the captcha is done: from here on it is the request itself
     return fetch(url, { method: "POST", body: fd, headers: CSRF ? { "X-CSRF": CSRF } : {} });
   };
@@ -67,6 +67,8 @@
   const gate = (res, data, text) => {
     if (res.status === 401 && data.error === "login_required") {
       if (text) draft.set(text);
+      const why = $("login-why");
+      if (why) { why.textContent = data.message || ""; why.hidden = !data.message; }
       if (loginDialog) loginDialog.showModal(); else location.assign("/entrar");
       return true;
     }
@@ -98,6 +100,13 @@
       btn.disabled = false; btn.removeAttribute("aria-busy"); btn.textContent = label;
     });
   });
+
+  // --- After a check without an account: the moment to offer one -----------------------------------
+  const welcome = $("bienvenida");
+  if (welcome && location.hash === "#bienvenida") {
+    welcome.hidden = false;
+    welcome.querySelector("[data-signup]")?.addEventListener("click", () => loginDialog ? loginDialog.showModal() : location.assign("/entrar"));
+  }
 
   // --- Instant navigation: a page is fetched as soon as the pointer rests on its link (or a finger
   //     touches it), so by the time of the click it is already here. Only plain pages of this site.
@@ -374,7 +383,7 @@
           job.clear();
           tabTitle("Listo");
           notify(ev, false);
-          if (!resumed) return location.assign(ev.url);
+          if (!resumed) return location.assign(ev.url + (ev.anon ? "#bienvenida" : ""));
           // Coming back to a check that finished meanwhile: offer the result instead of jumping to it.
           const a = Object.assign(document.createElement("a"), { href: ev.url, textContent: "Ver el resultado" });
           now.replaceChildren("Listo · ", a);

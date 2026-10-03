@@ -62,6 +62,10 @@
         {{ badge(r.rating, lg=True) }}
         <h1>{{ r.title }}</h1>
         <p class="verdict">{{ r.headline }}</p>
+        {% if not user %}<aside class="note welcome-note" id="bienvenida" hidden>
+          <p><b>¿Te sirvió?</b> Esta fue tu verificación sin cuenta de hoy. Con una cuenta gratis tienes {{ free_credits() }} al mes, hasta {{ daily_limit() }} por día, y guardas tu historial.</p>
+          <p><button class="btn primary" type="button" data-signup>Crear mi cuenta gratis</button></p>
+        </aside>{% endif %}
         {% if r.auto %}<p class="auto-note">Elegida por COntraste entre las noticias del día{% if r.auto.source %}, a partir de un titular de {{ r.auto.source }}{% endif %}. No la pidió un lector.</p>{% endif %}
         <p class="meta-row">
           <span>{{ ui('calendar', 15) }}<time datetime="{{ row.created_at }}">{{ format_date(row.created_at) }}</time></span>
