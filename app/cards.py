@@ -60,6 +60,13 @@ def format_date(ts: str) -> str:
     return f"{d.day} de {MONTHS[d.month - 1]} de {d.year}"
 
 
+def format_datetime(ts: str) -> str:
+    """"3 de octubre de 2026, 4:23 p. m." in Colombian time: updates of a developing story happen within hours."""
+    d = datetime.fromisoformat(ts).astimezone(COLOMBIA)
+    h = d.hour % 12 or 12
+    return f"{format_date(ts)}, {h}:{d.minute:02d} {'a. m.' if d.hour < 12 else 'p. m.'}"
+
+
 def usd(x: float) -> str:
     """US$0,0312 (Spanish decimal comma; small amounts keep four decimals)."""
     return "US$" + (f"{x:.4f}" if x < 1 else f"{x:.2f}").replace(".", ",")
@@ -73,7 +80,7 @@ def clip(text: str, n: int) -> str:
 env = Environment(loader=FileSystemLoader(APP_DIR / "templates"), autoescape=select_autoescape(["html", "xml"]))
 env.filters["fromjson"] = __import__("json").loads
 env.filters["cop"] = lambda n: f"{int(n):,}".replace(",", ".")
-env.globals.update(edition_date=edition_date, icon=icon, usd=usd, RATINGS=RATINGS, COLORS=COLORS, format_date=format_date, clip=clip, MARK=MARK,
+env.globals.update(edition_date=edition_date, icon=icon, usd=usd, RATINGS=RATINGS, COLORS=COLORS, format_date=format_date, format_datetime=format_datetime, clip=clip, MARK=MARK,
                    MARK_ICON=MARK_ICON, MARK_LABEL=MARK_LABEL)
 _FONTS = {n: base64.b64encode((APP_DIR / "static/fonts" / f).read_bytes()).decode()
           for n, f in (("display", "space-grotesk-latin-wght-normal.woff2"), ("body", "public-sans-latin-wght-normal.woff2"),

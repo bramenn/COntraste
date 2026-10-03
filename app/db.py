@@ -125,6 +125,13 @@ CREATE TABLE IF NOT EXISTS leases(name TEXT PRIMARY KEY, holder TEXT NOT NULL, u
 CREATE TABLE IF NOT EXISTS app_settings(key TEXT PRIMARY KEY, value JSONB NOT NULL);
 
 -- One answer per account. On account deletion user_id becomes NULL and the answer stays anonymous.
+-- Every version of every check, so readers can see what changed, when, git style. Checks made before this
+-- existed start with their state at that moment as version 1 ("historial detallado desde").
+CREATE TABLE IF NOT EXISTS article_versions(article_id TEXT NOT NULL, n INTEGER NOT NULL, at TEXT NOT NULL,
+  rating TEXT NOT NULL, note TEXT NOT NULL, result TEXT NOT NULL, PRIMARY KEY (article_id, n));
+INSERT INTO article_versions(article_id, n, at, rating, note, result)
+  SELECT id, 1, updated_at, rating, 'Versión vigente cuando empezó el historial detallado', result FROM articles a
+  WHERE NOT EXISTS (SELECT 1 FROM article_versions v WHERE v.article_id = a.id);
 -- Second looks at a recent check (6 and 24 hours after it was made): one row per pass, so it runs once.
 CREATE TABLE IF NOT EXISTS followups(article_id TEXT NOT NULL, hours INTEGER NOT NULL,
   at TIMESTAMPTZ NOT NULL DEFAULT now(), PRIMARY KEY (article_id, hours));
@@ -237,6 +244,8 @@ def save_article(result: dict, *, status: str, reason: str | None, keys: dict, d
       aid, slugify(result["title"]), ts, ts, status, reason, result["rating"], result["title"], result["topic"],
       result["input"]["kind"], keys.get("url_key"), keys.get("text_key"), keys.get("content_hash"), keys.get("phash"),
       keys.get("emb"), keys.get("emb2"), json.dumps(result, ensure_ascii=False), demo, search_text(result))
+    q("INSERT INTO article_versions VALUES(%s, 1, %s, %s, 'Publicación', %s) ON CONFLICT DO NOTHING",
+      aid, ts, result["rating"], json.dumps(result, ensure_ascii=False))
     return aid
 
 
@@ -254,6 +263,10 @@ def update_article(aid: str, result: dict, *, status: str | None = None, reason:
         if change:
             c.execute("INSERT INTO changes VALUES(%s,%s,%s,%s,%s,%s)",
                       (aid, iso(), change[0], change[1], old_rating, result["rating"]))
+            # The full new version, so its differences with the previous one can be shown.
+            c.execute("""INSERT INTO article_versions
+                         SELECT %s, COALESCE(MAX(n), 0) + 1, %s, %s, %s, %s FROM article_versions WHERE article_id=%s""",
+                      (aid, iso(), result["rating"], change[1], json.dumps(result, ensure_ascii=False), aid))
 
 
 def get(aid: str):
@@ -540,6 +553,11 @@ def near_articles(aid: str, low: float, high: float, limit: int) -> list[dict]:
         if low <= s < high:
             scored.append((s, r["id"]))
     return [get(i) for _, i in sorted(scored, reverse=True)[:limit]]
+
+
+def versions(aid: str) -> list[dict]:
+    """Every version of a check, oldest first, with its full content."""
+    return q("SELECT n, at, rating, note, result FROM article_versions WHERE article_id=%s ORDER BY n", aid)
 
 
 def changes(aid: str | None = None, kind: str | None = None):

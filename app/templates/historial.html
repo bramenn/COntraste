@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% from "_m.html" import ui, badge %}
+{% block title %}Cambios: {{ row.title }} · COntraste{% endblock %}
+{% block main %}
+<div class="wrap narrow">
+<section class="section stack history">
+  <nav class="crumbs" aria-label="Ruta"><a href="/">Inicio</a><span aria-hidden="true">›</span><a href="{{ path }}">La verificación</a><span aria-hidden="true">›</span><span>Cambios</span></nav>
+  <h1>Cómo ha cambiado esta verificación</h1>
+  <p class="lead"><a href="{{ path }}">{{ row.title }}</a></p>
+  <p class="meta-row">
+    <span>{{ ui('calendar', 15) }}Publicada el {{ format_datetime(row.created_at) }}</span>
+    {% if versions|length > 1 %}<span>{{ versions|length - 1 }} {{ 'actualización' if versions|length == 2 else 'actualizaciones' }} · la última el {{ format_datetime(row.updated_at) }}</span>{% endif %}
+  </p>
+  <p class="muted">Cada versión se compara con la anterior, como en un control de versiones: <span class="d-legend d-del">− en rojo</span> lo que se borró o cambió, <span class="d-legend d-add">+ en verde</span> lo nuevo. Dentro de una línea que cambió se resaltan las palabras exactas.</p>
+
+  <ol class="versions" reversed>
+  {% for v in versions %}
+    <li class="version">
+      <header>
+        <b>Versión {{ v.n }}</b> · {{ format_datetime(v.at) }} {{ badge(v.rating) }}
+        <p class="muted">{{ v.note }}</p>
+      </header>
+      {% if v.diff is none %}
+        <p class="muted">{% if v.n == 1 and v.note != 'Publicación' %}Primera versión guardada completa: el historial detallado empezó aquí. Los cambios anteriores aparecen abajo, sin el detalle.{% else %}Primera versión publicada.{% endif %}</p>
+      {% elif not v.diff %}
+        <p class="muted">Sin cambios en el contenido.</p>
+      {% else %}
+        <details class="diff-box"{% if loop.first %} open{% endif %}>
+          <summary>Qué cambió respecto a la versión {{ v.n - 1 }}</summary>
+          <div class="diff" role="table" aria-label="Diferencias con la versión {{ v.n - 1 }}">
+          {% for d in v.diff %}
+            {% if d.op == '…' %}<div class="d-fold">… {{ d.n }} {{ 'línea' if d.n == 1 else 'líneas' }} sin cambios</div>
+            {% else %}<div class="d-line {{ {'-': 'd-del', '+': 'd-add', ' ': 'd-ctx'}[d.op] }}"><span class="d-sign" aria-label="{{ {'-': 'borrado', '+': 'agregado', ' ': 'sin cambios'}[d.op] }}">{{ '−' if d.op == '-' else d.op }}</span><span>{% for changed, text in d.segs %}{% if changed %}<mark>{{ text }}</mark>{% else %}{{ text }}{% endif %}{% if not loop.last %} {% endif %}{% endfor %}</span></div>{% endif %}
+          {% endfor %}
+          </div>
+        </details>
+      {% endif %}
+    </li>
+  {% endfor %}
+  </ol>
+
+  {% if changes %}
+  <h2>Registro de cambios</h2>
+  <ul class="changes">{% for c in changes %}
+    <li><strong>{{ format_datetime(c.at) }}:</strong> {{ c.note }}{% if c.old_rating and c.new_rating and c.old_rating != c.new_rating %} ({{ RATINGS[c.old_rating] }} → {{ RATINGS[c.new_rating] }}){% endif %}</li>
+  {% endfor %}</ul>
+  {% endif %}
+  <p><a class="btn" href="{{ path }}">Volver a la verificación</a></p>
+</section>
+</div>
+{% endblock %}

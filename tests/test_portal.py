@@ -450,3 +450,33 @@ def test_thumbnail_urls_change_with_the_rating(client):
     versioned = client.get(main.media_url(db.get(row["id"]), row["id"] + ".jpg"))
     assert versioned.status_code == 200 and "immutable" in versioned.headers["cache-control"]
     assert "immutable" not in client.get(f"/media/{row['id']}.jpg").headers["cache-control"]
+
+
+def test_each_update_is_a_version_and_the_history_shows_what_changed(client):
+    """Readers see when a check was published, when each update came and, git style, what was removed (red) and
+    added (green) between versions."""
+    import json
+    aid = _new_article()
+    row = db.get(aid)
+    r = json.loads(row["result"])
+    old_title = r["claims"][0]["explanation"]
+    r["claims"][0]["explanation"] = old_title + " Nueva evidencia del 3 de octubre."
+    r["rating"] = "falso" if r["rating"] != "falso" else "verdadero"
+    db.update_article(aid, r, change=("actualizacion", "Se encontró nueva evidencia."), old_rating=row["rating"])
+    assert [v["n"] for v in db.versions(aid)] == [1, 2]
+    page = client.get(db.path_of(db.get(aid))).text
+    assert "Publicada" in page and "/cambios" in page and "ver qué cambió" in page
+    hist = client.get(db.path_of(db.get(aid)) + "/cambios").text
+    assert "Versión 2" in hist and "Versión 1" in hist and "Se encontró nueva evidencia." in hist
+    assert 'class="d-line d-del"' in hist and 'class="d-line d-add"' in hist
+    assert "<mark>evidencia</mark>" in hist or "<mark>Nueva" in hist        # the exact words that changed
+
+
+def test_version_diff_marks_removed_added_and_folds_unchanged_lines():
+    from app.main import version_diff
+    old = ["a", "b", "c", "d", "e", "Calificación: Sin pruebas"]
+    new = ["a", "b", "c", "d", "e", "Calificación: Falso", "Fuente: El Tiempo"]
+    rows = version_diff(old, new)
+    assert rows[0] == {"op": "…", "n": 4}
+    assert [r["op"] for r in rows[1:]] == [" ", "-", "+", "+"]
+    assert (True, "Sin pruebas") in rows[2]["segs"] or any(c and "Sin" in t for c, t in rows[2]["segs"])

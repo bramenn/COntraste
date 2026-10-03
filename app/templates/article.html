@@ -81,8 +81,8 @@
         </aside>{% endif %}
         {% if r.auto %}<p class="auto-note">Elegida por COntraste entre las noticias del día{% if r.auto.source %}, a partir de un titular de {{ r.auto.source }}{% endif %}. No la pidió un lector.</p>{% endif %}
         <p class="meta-row">
-          <span>{{ ui('calendar', 15) }}<time datetime="{{ row.created_at }}">{{ format_date(row.created_at) }}</time></span>
-          {% if row.updated_at[:10] != row.created_at[:10] %}<span>Actualizado {{ format_date(row.updated_at) }}</span>{% endif %}
+          <span>{{ ui('calendar', 15) }}Publicada <time datetime="{{ row.created_at }}">{{ format_datetime(row.created_at) }}</time></span>
+          {% if changes %}<span class="updated"><a href="{{ path }}/cambios">{{ plural(changes|length, 'actualización', 'actualizaciones') }} · la última <time datetime="{{ row.updated_at }}">{{ format_datetime(row.updated_at) }}</time> · ver qué cambió</a></span>{% endif %}
           <span>{{ ui('trend', 15) }}{{ plural(consults, 'consulta', 'consultas') }}</span>
           <span>{{ plural(r.sources|length, 'fuente', 'fuentes') }}</span>
           <span>{% if row.human_reviewed_at %}Revisada por el equipo el {{ format_date(row.human_reviewed_at) }}{% else %}Verificación automatizada con reglas fijas{% endif %}</span>
@@ -190,8 +190,9 @@
       {% if changes %}
       <section class="block" aria-labelledby="h-changes">
         <h2 id="h-changes">Historial de cambios</h2>
+        <p><a class="btn" href="{{ path }}/cambios">Ver cada versión y qué cambió, línea por línea</a></p>
         <ul class="changes">{% for c in changes %}
-          <li><strong>{{ {'correccion': 'Corrección', 'revision': 'Revisada'}.get(c.kind, 'Actualizado') }} el {{ format_date(c.at) }}:</strong> {{ c.note }}{% if c.old_rating != c.new_rating %} <span class="muted">({{ RATINGS[c.old_rating] }} → {{ RATINGS[c.new_rating] }})</span>{% endif %}</li>
+          <li><strong>{{ {'correccion': 'Corrección', 'revision': 'Revisada'}.get(c.kind, 'Actualizado') }} el {{ format_datetime(c.at) }}:</strong> {{ c.note }}{% if c.old_rating != c.new_rating %} <span class="muted">({{ RATINGS[c.old_rating] }} → {{ RATINGS[c.new_rating] }})</span>{% endif %}</li>
         {% endfor %}</ul>
       </section>
       {% endif %}

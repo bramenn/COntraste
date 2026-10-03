@@ -1,5 +1,6 @@
 import asyncio
 import base64
+import difflib
 import hashlib
 import ipaddress
 import json
@@ -841,6 +842,67 @@ def ai_prompt(row, r: dict) -> str:
         md = md[:AI_MAX].rsplit("\n", 1)[0] + (f"\n\n(Resumen recortado. La verificación completa, en Markdown: "
                                               f"{settings.PUBLIC_BASE_URL}{db.path_of(row)}.md)\n")
     return AI_ASK.format(base=settings.PUBLIC_BASE_URL) + md
+
+
+def version_lines(r: dict) -> list[str]:
+    """A version as readable lines, for comparing it with the previous one. Sources are sorted by name, so a
+    different order is not shown as a change."""
+    lines = [f"Título: {r['title']}", f"Calificación: {RATINGS[r['rating']]}", f"Veredicto: {r['headline']}",
+             f"Lo que circula: {r['circulating']}"]
+    for c in r.get("claims", []):
+        lines += [f"Afirmación{' central' if c.get('central') else ''}: {c['text']}",
+                  f"   Calificación: {RATINGS[c['rating']]}", f"   Explicación: {c['explanation']}"]
+    lines += [f"Fuente: {s['name']}, {s.get('title') or s['url']}" for s in sorted(r.get("sources", []), key=lambda s: (s["name"], s["url"]))]
+    return lines
+
+
+def version_diff(old: list[str], new: list[str], context: int = 1) -> list[dict]:
+    """Git-style: "-" removed or changed, "+" added, " " context, "…" unchanged lines folded. In a changed line
+    the words that changed are marked, so a new date or a different rating stands out."""
+    def words(a: str, b: str):
+        wa, wb = a.split(" "), b.split(" ")
+        segs_a, segs_b = [], []
+        for op, i1, i2, j1, j2 in difflib.SequenceMatcher(None, wa, wb).get_opcodes():
+            if i2 > i1:
+                segs_a.append((op != "equal", " ".join(wa[i1:i2])))
+            if j2 > j1:
+                segs_b.append((op != "equal", " ".join(wb[j1:j2])))
+        return segs_a, segs_b
+    rows = []
+    ops = difflib.SequenceMatcher(None, old, new, autojunk=False).get_opcodes()
+    for k, (op, i1, i2, j1, j2) in enumerate(ops):
+        if op == "equal":
+            block = old[i1:i2]
+            head = block[:context] if k > 0 else []
+            tail = block[-context:] if k < len(ops) - 1 and len(block) > context else []
+            rows += [{"op": " ", "segs": [(False, t)]} for t in head]
+            if len(block) > len(head) + len(tail):
+                rows.append({"op": "…", "n": len(block) - len(head) - len(tail)})
+            rows += [{"op": " ", "segs": [(False, t)]} for t in tail]
+            continue
+        a, b = old[i1:i2], new[j1:j2]
+        paired = [words(x, y) for x, y in zip(a, b)] if op == "replace" else []
+        rows += [{"op": "-", "segs": paired[i][0] if i < len(paired) else [(False, t)]} for i, t in enumerate(a)]
+        rows += [{"op": "+", "segs": paired[i][1] if i < len(paired) else [(False, t)]} for i, t in enumerate(b)]
+    return rows
+
+
+@app.get("/v/{year}/{month}/{slug_id}/cambios", response_class=HTMLResponse)
+def article_history(year: int, month: int, slug_id: str):
+    """Every version of a check and what changed between each one and the previous, with date and time."""
+    row = db.get(slug_id.rsplit("-", 1)[-1])
+    if not row or row["status"] == "removed":
+        return not_found()
+    if f"/v/{year}/{month:02d}/{slug_id}" != db.path_of(row):
+        return RedirectResponse(db.path_of(row) + "/cambios", status_code=301)
+    items, prev = [], None
+    for v in db.versions(row["id"]):
+        lines = version_lines(json.loads(v["result"]))
+        items.append({"n": v["n"], "at": v["at"], "rating": v["rating"], "note": v["note"],
+                      "diff": version_diff(prev, lines) if prev is not None else None})
+        prev = lines
+    return page("historial.html", row=row, path=db.path_of(row), versions=list(reversed(items)),
+                changes=db.changes(row["id"]), noindex=True)
 
 
 @app.get("/v/{year}/{month}/{slug_id}.md")

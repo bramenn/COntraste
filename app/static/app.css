@@ -701,3 +701,19 @@ img{transition:opacity .25s}
 .ai-md{font-family:var(--mono,monospace);font-size:.8rem;color:var(--muted);margin-left:auto}
 .ai-status{flex-basis:100%;font-size:.85rem;color:var(--muted)}
 .ai-bar-label{flex-basis:100%}.ai-btn:not(.ai-icon){flex:1;justify-content:center}
+/* Version history, git style: red what was removed or changed, green what is new. */
+.versions{list-style:none;padding:0;display:flex;flex-direction:column;gap:14px}
+.version{border:1px solid var(--line);border-radius:var(--radius,12px);background:var(--surface);padding:14px}
+.version header b{font-family:var(--mono,monospace)}
+.diff-box summary{cursor:pointer;color:var(--accent);margin:6px 0}
+.diff{font-family:var(--mono,monospace);font-size:.82rem;line-height:1.5;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.d-line{display:grid;grid-template-columns:22px 1fr;padding:2px 8px;white-space:pre-wrap;word-break:break-word}
+.d-sign{user-select:none;opacity:.8}
+.d-del{background:rgb(239 62 74/.13);color:#ffc2c6}
+.d-add{background:rgb(52 211 153/.12);color:#bff5dc}
+.d-del mark{background:rgb(239 62 74/.45);color:#fff;border-radius:3px}
+.d-add mark{background:rgb(52 211 153/.42);color:#fff;border-radius:3px}
+.d-ctx{color:var(--muted)}
+.d-fold{padding:2px 8px;color:var(--muted);font-style:italic;background:var(--sunk)}
+.d-legend{padding:0 6px;border-radius:4px;font-family:var(--mono,monospace);font-size:.85em}
+.meta-row .updated a{color:var(--accent)}
