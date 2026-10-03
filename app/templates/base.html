@@ -19,7 +19,7 @@
 {% block head %}{% endblock %}
 <script src="{{ asset('app.js') }}" defer></script>
 <script type="speculationrules">{"prerender": [{"eagerness": "moderate", "where": {"and": [{"href_matches": "/*"},
-  {"not": {"href_matches": ["/api/*", "/admin*", "/auth/*", "/dev/*", "/media/*", "/static/*", "/salir*", "/*.xml", "/*.png", "/*.webp", "/*.txt"]}},
+  {"not": {"href_matches": ["/api/*", "/admin*", "/auth/*", "/dev/*", "/media/*", "/static/*", "/salir*", "/*.xml", "/*.md", "/*.png", "/*.webp", "/*.txt"]}},
   {"not": {"selector_matches": "[download], [target=_blank]"}}]}}]}</script>
 </head>
 <body>

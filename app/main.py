@@ -788,6 +788,50 @@ def short(aid: str):
     return RedirectResponse(db.path_of(row), status_code=301) if row else not_found()
 
 
+AI_ASK = ("Te comparto una verificación de COntraste, un verificador de desinformación de Colombia. Analízala con "
+          "pensamiento crítico: ¿la evidencia sostiene cada calificación?, ¿qué falta?, ¿qué contraargumentos o fuentes "
+          "podrían cambiarla? Responde en español.\n\n")
+AI_MAX = 6000  # Markdown chars in a prefilled prompt: Claude cuts at ~14,000 and long links fail on some servers
+
+
+def article_markdown(row, r: dict, full: bool = True) -> str:
+    """The check as Markdown, to continue with an AI assistant or read without HTML. `full` adds the evidence of
+    each claim and every source; the short form is what fits in a prefilled prompt."""
+    url = settings.PUBLIC_BASE_URL + db.path_of(row)
+    src = r.get("sources", [])
+    out = [f"# {r['title']}", "", f"**Calificación: {RATINGS[r['rating']]}.** {r['headline']}", "",
+           f"Verificación de COntraste del {row['created_at'][:10]}: {url}", "", "## Lo que circula", "", f"> {r['circulating']}",
+           "", "## Lo que se verificó", ""]
+    for c in r.get("claims", []):
+        out += [f"- **{RATINGS[c['rating']]}{' (lo central)' if c.get('central') else ''}:** {c['text']}", f"  {c['explanation']}"]
+        if full:
+            out += [f"  - {src[e['source']]['name']} ({e['stance']}): {src[e['source']]['url']}"
+                    for e in c.get("evidence", []) if e["source"] < len(src)]
+    out += [f"- **No verificable:** {n.get('text', '')}" for n in r.get("not_verifiable", []) if n.get("text")]
+    out += ["", "## Fuentes", ""]
+    for s in src if full else src[:8]:
+        out.append(f"- {s['name']}{', ' + s['date'][:10] if s.get('date') else ''}: [{(s.get('title') or s['url'])[:120]}]({s['url']})")
+    return "\n".join(out) + "\n"
+
+
+def ai_prompt(row, r: dict) -> str:
+    md = article_markdown(row, r, full=False)
+    if len(md) > AI_MAX:
+        md = md[:AI_MAX].rsplit("\n", 1)[0] + (f"\n\n(Resumen recortado. La verificación completa, en Markdown: "
+                                              f"{settings.PUBLIC_BASE_URL}{db.path_of(row)}.md)\n")
+    return AI_ASK + md
+
+
+@app.get("/v/{year}/{month}/{slug_id}.md")
+def article_md(year: int, month: int, slug_id: str):
+    row = db.get(slug_id.rsplit("-", 1)[-1])
+    if not row or row["status"] == "removed":
+        return PlainTextResponse("No encontrado.", status_code=404)
+    headers = {} if row["status"] == "listed" else {"X-Robots-Tag": "noindex"}
+    return PlainTextResponse(article_markdown(row, json.loads(row["result"])), media_type="text/markdown; charset=utf-8",
+                             headers=headers)
+
+
 @app.get("/v/{year}/{month}/{slug_id}", response_class=HTMLResponse)
 def article(year: int, month: int, slug_id: str):
     aid = slug_id.rsplit("-", 1)[-1]
@@ -830,7 +874,7 @@ def article(year: int, month: int, slug_id: str):
                  "item": f"{settings.PUBLIC_BASE_URL}/archivo?tema={row['topic']}"},
                 {"@type": "ListItem", "position": 3, "name": r["title"][:110]}]},
         ]}, ensure_ascii=False).replace("</", "<\\/")
-    return page("article.html", row=row, r=r, path=canonical_path, claim_review=claim_review,
+    return page("article.html", row=row, r=r, path=canonical_path, claim_review=claim_review, ai_prompt=ai_prompt(row, r),
                 consults=db.consult_count(aid), views=db.view_count(aid), changes=db.changes(aid),
                 related=db.related(row), noindex=row["status"] != "listed",
                 reviewed_n=db.q1("""SELECT COUNT(*) AS n FROM contributions WHERE article_id=%s AND user_id IS NOT NULL

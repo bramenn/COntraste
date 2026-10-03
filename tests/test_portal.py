@@ -390,3 +390,22 @@ def test_the_site_points_to_its_open_source_code(client):
     assert settings.SOURCE_URL in client.get("/").text and 'id="codigo-abierto"' in client.get("/como-funciona").text
     page = client.get(db.path_of(row)).text
     assert "issues/new?template=verificacion-incorrecta.yml" in page and "url=http" in page
+
+
+def test_a_check_continues_in_an_ai_assistant(client):
+    """Each check opens in ChatGPT or Claude with a prefilled, neutral prompt and its evidence, and exists as
+    Markdown. The prompt stays under what Claude accepts (~14,000 chars) even for a huge check."""
+    import urllib.parse
+    from app import main
+    aid = _new_article()
+    row = db.get(aid)
+    md = client.get(db.path_of(row) + ".md")
+    assert md.status_code == 200 and md.headers["content-type"].startswith("text/markdown")
+    r = __import__("json").loads(row["result"])
+    assert md.text.startswith(f"# {r['title']}") and "## Lo que se verificó" in md.text and "## Fuentes" in md.text
+    page = client.get(db.path_of(row)).text
+    q = urllib.parse.unquote(page.split("https://claude.ai/new?q=", 1)[1].split('"', 1)[0])
+    assert q.startswith("Te comparto una verificación de COntraste") and r["title"] in q
+    assert "https://chatgpt.com/?q=" in page and 'id="ai-prompt"' in page
+    huge = r | {"sources": [{"name": f"Medio {i}", "url": f"https://m{i}.co/n", "title": "x" * 200} for i in range(500)]}
+    assert len(main.ai_prompt(row, huge)) < len(main.AI_ASK) + main.AI_MAX + 300

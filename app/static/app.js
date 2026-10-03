@@ -101,6 +101,21 @@
     });
   });
 
+  // --- Continue with an AI assistant: copy, or the phone's share sheet (ChatGPT and Claude apps are there) -
+  const aiTpl = $("ai-prompt");
+  if (aiTpl) {
+    const text = aiTpl.content.textContent, status = $("ai-status");
+    const say = (m) => { status.textContent = m; status.hidden = false; };
+    document.querySelector("[data-copy-ai]")?.addEventListener("click", async () => {
+      try { await navigator.clipboard.writeText(text); say("Copiado. Pégalo en tu asistente de IA."); } catch { say("No se pudo copiar."); }
+    });
+    const share = document.querySelector("[data-share-ai]");
+    if (share && navigator.share) {
+      share.hidden = false;
+      share.addEventListener("click", () => navigator.share({ text }).catch(() => {}));
+    }
+  }
+
   // --- After a check without an account: the moment to offer one -----------------------------------
   const welcome = $("bienvenida");
   if (welcome && location.hash === "#bienvenida") {
@@ -113,7 +128,7 @@
   // Chrome prerenders the whole page instead (speculation rules in base.html); this covers the other browsers.
   const fetched = new Set();
   const PRERENDERS = HTMLScriptElement.supports?.("speculationrules");
-  const SKIP = /^\/(api|admin|auth|dev|media|static|salir)\b|\.(xml|png|webp|txt)$/;
+  const SKIP = /^\/(api|admin|auth|dev|media|static|salir)\b|\.(xml|png|webp|txt|md)$/;
   const prefetch = (a) => {
     const url = new URL(a.href, location.href);
     const key = url.pathname + url.search;

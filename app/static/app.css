@@ -679,3 +679,4 @@ img{transition:opacity .25s}
 @keyframes co-flow{from{background-position:0% 50%}to{background-position:100% 50%}}
 @media (prefers-reduced-motion:reduce){.logo,.hero h1{animation:none}.hero h1{background-position:40% 50%}}
 .welcome-note{margin-top:14px}
+.ai-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
