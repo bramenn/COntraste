@@ -258,8 +258,12 @@ def focus_rating(claims: list[dict]) -> str:
     central = [c["rating"] for c in claims if c.get("central") and c["rating"] != "no_verificable"]
     if not central:
         return overall_rating([c["rating"] for c in claims])
-    worse = [c["rating"] for c in claims if not c.get("central") and c["rating"] in ("falso", "enganoso")]
-    return overall_rating(central + worse)
+    base = overall_rating(central)
+    # A false or misleading side claim lowers it to "engañoso" at most: only a false central claim makes it "falso".
+    if base in ("verdadero", "matices", "sin_pruebas") and any(
+            not c.get("central") and c["rating"] in ("falso", "enganoso") for c in claims):
+        return "enganoso"
+    return base
 
 
 def overall_rating(ratings: list[str]) -> str:

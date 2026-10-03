@@ -444,6 +444,9 @@ def test_the_central_claim_decides_the_overall_rating():
     # A false side claim makes it worse, never a true one better: the law exists, but the wrong government signed it.
     law = [{"rating": "verdadero", "central": True}, {"rating": "falso", "central": False}]
     assert focus_rating(law) == "enganoso"
+    # ...and lowers it to "engañoso" at most: an unproven central claim with a false side claim is not "falso".
+    assert focus_rating([{"rating": "sin_pruebas", "central": True}, {"rating": "falso", "central": False}]) == "enganoso"
+    assert focus_rating([{"rating": "falso", "central": True}, {"rating": "verdadero", "central": False}]) == "falso"
 
 
 def test_the_model_standard_cases_are_well_formed():
