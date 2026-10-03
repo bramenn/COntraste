@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% from "_m.html" import badge %}
-{% block title %}Panel editorial · Contraste{% endblock %}
+{% block title %}Panel editorial · COntraste{% endblock %}
 {% block main %}
 <div class="wrap admin">
 <section class="section">
@@ -83,6 +83,8 @@
     <p class="muted">Si la subes, todas las cuentas reciben la diferencia este mes. Si la bajas, no se le quita nada a nadie este mes.</p>
     <label>Máximo de verificaciones por cuenta cada día <input type="text" name="daily_checks" inputmode="numeric" value="{{ daily_n }}" required></label>
     <p class="muted">El día es el de Colombia. Las verificaciones rechazadas que devolvimos no cuentan.</p>
+    <label>Verificaciones del día elegidas por COntraste <input type="text" name="auto_checks" inputmode="numeric" value="{{ auto_n }}" required></label>
+    <p class="muted">Se toman de las noticias que mueven a Colombia en ese momento, repartidas de 7 a. m. a 7 p. m.; 0 las apaga. Cuentan para el límite de gasto diario, no para el de nadie.</p>
     <label>Verificaciones de regalo por responder la encuesta <input type="text" name="survey_reward" inputmode="numeric" value="{{ survey_reward }}" required></label>
     <p><button class="btn primary" type="submit">Guardar</button></p></form>
   <p class="{{ 'note warn' if spend.warn else 'note' }}">Gasto en modelos hoy: <b>{{ usd(spend.today) }}</b> de {{ usd(spend.cap) }} ({{ spend.pct }} %).
@@ -116,7 +118,7 @@
   <p>{{ s.n }} respuestas.{% if s.n < 30 %} <span class="muted">Con menos de 30 respuestas los porcentajes cambian mucho; tómalos como pista, no como conclusión.</span>{% endif %}</p>
 
   <h2 class="mt-s">¿Qué tan necesario es? (prueba de Sean Ellis)</h2>
-  <p class="{{ 'note' if s.very_pct >= 40 else 'note warn' }}"><b>{{ s.very_pct }} %</b> estaría muy decepcionado sin Contraste. La referencia es 40 %: por encima, el producto ya es imprescindible para un grupo de personas; por debajo, conviene mejorar antes de buscar más usuarios.</p>
+  <p class="{{ 'note' if s.very_pct >= 40 else 'note warn' }}"><b>{{ s.very_pct }} %</b> estaría muy decepcionado sin COntraste. La referencia es 40 %: por encima, el producto ya es imprescindible para un grupo de personas; por debajo, conviene mejorar antes de buscar más usuarios.</p>
   <table>{% for label, n, pct in s.pmf %}<tr><td>{{ label }}</td><td>{{ n }}</td><td>{{ pct }} %</td></tr>{% endfor %}</table>
 
   <h2 class="mt-s">Para qué lo usan</h2>

@@ -50,7 +50,7 @@ def validate(form) -> tuple[dict | None, str | None]:
          "improve": [i for i in form.getlist("improve") if i in IMPROVE][:2],
          "benefit": str(form.get("benefit", "")).strip()[:500], "improve_text": str(form.get("improve_text", "")).strip()[:500]}
     if a["pmf"] not in PMF:
-        return None, "Responde cómo te sentirías si ya no pudieras usar Contraste."
+        return None, "Responde cómo te sentirías si ya no pudieras usar COntraste."
     if not a["uses"] or not a["improve"]:
         return None, "Elige para qué lo usas y qué deberíamos mejorar."
     return a, None

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% set nav = 'como' %}
-{% block title %}Cómo funciona · Contraste{% endblock %}
-{% block description %}Cómo verifica Contraste: fuentes de todo el mundo, datos abiertos, independencia por dueño de los medios y reglas fijas que no dependen de nadie.{% endblock %}
+{% block title %}Cómo funciona · COntraste{% endblock %}
+{% block description %}Cómo verifica COntraste, con código abierto: fuentes de todo el mundo, datos abiertos, independencia por dueño de los medios y reglas fijas que no dependen de nadie.{% endblock %}
 {% block main %}
 <div class="wrap">
 <section class="section prose">
@@ -64,8 +64,15 @@
   <h2>Cómo contamos las lecturas</h2>
   <p>Sin cookies ni analítica de terceros. Una lectura cuenta si la página estuvo visible 5 segundos. Contamos una por visitante al día con una huella anónima cuya clave cambia a diario y se borra. No guardamos direcciones IP ni datos del navegador (Ley 1581 de 2012).</p>
 
+  <h2>Verificaciones del día</h2>
+  <p>Además de lo que piden los lectores, cada día COntraste elige por su cuenta algunas de las noticias que están moviendo a Colombia en ese momento y las verifica: busca en cada una lo que afirma un actor público (un gobierno, un político, una entidad, una empresa), descarta lo que ya verificamos y sigue exactamente las mismas reglas. Esas verificaciones lo dicen arriba: «Elegida por COntraste entre las noticias del día».</p>
+
   <h2>Correcciones</h2>
   <p>Si nos equivocamos, lo corregimos a la vista en el artículo y en <a href="/correcciones">correcciones</a>.</p>
+
+  <h2 id="codigo-abierto">Código abierto</h2>
+  <p>COntraste es software libre, con licencia AGPL-3.0. Todo el método está publicado: las reglas que deciden cada calificación, las instrucciones que reciben los modelos, la lista de fuentes con sus dueños y las pruebas que lo comprueban. Cualquiera puede revisarlo, proponer mejoras o montar su propia copia. También explicamos <a href="{{ SOURCE_URL }}#modelos" rel="noopener">qué modelos de inteligencia artificial usamos y por qué</a>.</p>
+  <p><a class="btn" href="{{ SOURCE_URL }}" rel="noopener">Ver el código</a>{% if 'github.com' in SOURCE_URL %} <a class="btn" href="{{ SOURCE_URL }}/issues/new?template=verificacion-incorrecta.yml" rel="noopener">Reportar una verificación incorrecta</a>{% endif %}</p>
 </section>
 </div>
 {% endblock %}

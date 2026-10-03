@@ -666,3 +666,4 @@ img{transition:opacity .25s}
 .img-note{margin-top:8px;max-width:640px;font-size:.85rem;color:var(--warn-ink);background:var(--warn-bg);padding:8px 12px;border-radius:10px}
 .img-note[hidden]{display:none}
 .central-tag{font-family:var(--mono,monospace);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2,inherit);border:1px solid currentColor;border-radius:999px;padding:2px 8px;opacity:.85;margin-right:auto}
+.auto-note{font-family:var(--mono,monospace);font-size:.78rem;letter-spacing:.04em;color:var(--accent);margin-top:6px}

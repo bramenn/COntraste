@@ -44,7 +44,7 @@ SMTP_HOST = env("SMTP_HOST")
 SMTP_PORT = int(env("SMTP_PORT", "587"))
 SMTP_USER = env("SMTP_USER")
 SMTP_PASSWORD = env("SMTP_PASSWORD")
-MAIL_FROM = env("MAIL_FROM", "Contraste <no-reply@localhost>")
+MAIL_FROM = env("MAIL_FROM", "COntraste <no-reply@localhost>")
 GOOGLE_OAUTH_CLIENT_ID = env("GOOGLE_OAUTH_CLIENT_ID")
 GOOGLE_OAUTH_CLIENT_SECRET = env("GOOGLE_OAUTH_CLIENT_SECRET")
 TURNSTILE_SITE_KEY = env("TURNSTILE_SITE_KEY")
@@ -55,6 +55,7 @@ TURNSTILE_HOSTNAMES = [h for h in (x.strip() for x in env("TURNSTILE_HOSTNAMES")
     (urlsplit(PUBLIC_BASE_URL).hostname or "")
 ]
 DAILY_CHECKS = int(env("DAILY_CHECKS", "5"))  # per account per day; editors change it in /admin
+AUTO_CHECKS_PER_DAY = int(env("AUTO_CHECKS_PER_DAY", "5"))  # checks COntraste picks from the day's news; 0 = off
 FREE_MONTHLY_CREDITS = int(env("FREE_MONTHLY_CREDITS", "5"))  # starting value; editors change it in /admin
 # Entry gate (app/gate.py): fast classifier for relevance to Colombia and prompt injection, before research.
 GATE = env("GATE", "true").lower() in ("1", "true", "yes")

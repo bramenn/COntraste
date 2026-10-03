@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
-<title>{% block title %}Contraste · Verifica antes de compartir{% endblock %}</title>
-<meta name="description" content="{% block description %}Pega un enlace, sube una captura o escribe lo que te llegó. Contraste lo revisa en fuentes públicas de todo el mundo y en datos abiertos.{% endblock %}">
+<title>{% block title %}COntraste · Verifica antes de compartir{% endblock %}</title>
+<meta name="description" content="{% block description %}Pega un enlace, sube una captura o escribe lo que te llegó. COntraste lo revisa en fuentes públicas de todo el mundo y en datos abiertos.{% endblock %}">
 <meta name="robots" content="{{ 'noindex, follow' if noindex else 'index, follow, max-image-preview:large, max-snippet:-1' }}">
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#070b12">
@@ -12,7 +12,7 @@
 <link rel="preload" href="/static/fonts/public-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/static/fonts/space-grotesk-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="{{ asset('app.css') }}">
-<link rel="alternate" type="application/rss+xml" title="Contraste" href="/feed.xml">
+<link rel="alternate" type="application/rss+xml" title="COntraste" href="/feed.xml">
 {% if csrf %}<meta name="csrf" content="{{ csrf }}">{% endif %}
 {% if TURNSTILE %}<meta name="turnstile" content="{{ TURNSTILE }}">
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>{% endif %}
@@ -28,7 +28,7 @@
 {% include "_art.html" %}
 <header class="site-head">
   <div class="wrap">
-    <a class="brand" href="/" aria-label="Contraste, ir a la portada"><span class="logo" aria-hidden="true"></span><span class="brand-name">Contraste</span><span class="brand-tag">verificador</span></a>
+    <a class="brand" href="/" aria-label="COntraste, ir a la portada"><span class="logo" aria-hidden="true"></span><span class="brand-name">COntraste</span><span class="brand-tag">verificador</span></a>
     <nav class="nav" aria-label="Secciones">
       <a href="/archivo" {% if nav == 'archivo' %}aria-current="page"{% endif %}>Archivo</a>
       <a href="/como-funciona" {% if nav == 'como' %}aria-current="page"{% endif %}>Cómo funciona</a>
@@ -87,7 +87,7 @@
 <main id="main">{% block main %}{% endblock %}</main>
 {% if survey_prompt is defined %}
 <aside class="survey-toast" id="survey-toast" aria-label="Encuesta" hidden>
-  <p><b>¿Nos ayudas a mejorar Contraste?</b> Es 1 minuto{% if survey_prompt %} y te damos {{ survey_prompt }} verificaciones gratis{% endif %}.</p>
+  <p><b>¿Nos ayudas a mejorar COntraste?</b> Es 1 minuto{% if survey_prompt %} y te damos {{ survey_prompt }} verificaciones gratis{% endif %}.</p>
   <p><a class="btn primary" href="/encuesta">Responder</a> <button class="btn" type="button" data-dismiss>Ahora no</button></p>
 </aside>
 {% endif %}
@@ -114,7 +114,7 @@
     <a class="btn primary alm-cta" href="/memoria">Ver la memoria completa, con sus fuentes {{ ui('right', 16) }}</a>
   </section>
   <div class="wrap">
-    <b><span class="logo" aria-hidden="true"></span> Contraste · Solo evidencia · Sin perfiles públicos</b>
+    <b><span class="logo" aria-hidden="true"></span> COntraste · Solo evidencia · Sin perfiles públicos</b>
     <span><a href="/como-funciona">Cómo funciona</a> · <a href="/correcciones">Correcciones</a> · <a href="/privacidad">Privacidad</a> · <a href="/feed.xml">RSS</a> · <a href="{{ SOURCE_URL }}" rel="noopener">Código fuente</a></span>
   </div>
 </footer>

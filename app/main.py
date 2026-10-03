@@ -20,7 +20,7 @@ from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse, Red
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.gzip import GZipMiddleware
 
-from . import accounts, cards, credits, db, llm, markets, memoria, news, settings
+from . import accounts, auto, cards, credits, db, llm, markets, memoria, news, settings
 from .fetch import FetchError, check_url, extract, safe_get
 from .ingest import Charged, UserError, fingerprint, load_image, png_bytes
 from .pipeline import Duplicate, investigate, publish_decision
@@ -173,6 +173,8 @@ async def run_job(job: dict):
         else:
             await emit("Recibiendo el contenido", 3)
             result, k2, thumb = await investigate(inp, emit)
+            if inp.get("auto"):  # chosen by COntraste among the day's news, not asked for by a reader
+                result["auto"] = {"headline": inp.get("headline", ""), "source": inp.get("source", "")}
             await emit("Preparando la tarjeta", 94)
             url = await finalize(result, keys | {k: v for k, v in k2.items() if v}, thumb, job_id)
         aid = url.rsplit("-", 1)[-1]
@@ -248,6 +250,11 @@ async def maintenance_loop():
                     if mine:
                         await asyncio.to_thread(db.recompute_scores)
                         await asyncio.to_thread(db.jobs_cleanup)
+                        if not settings.DEMO_MODE:
+                            try:
+                                await auto.tick()
+                            except Exception:
+                                log.exception("check of the day not started")
             if settings.MARKETS and tick % 120 == 0:  # every ~30 minutes, one replica
                 with db.singleton(3) as mine:
                     if mine:
@@ -773,7 +780,7 @@ def article(year: int, month: int, slug_id: str):
                           "primary": 0, "concentrated": list(conc) if conc else None}
     url = settings.PUBLIC_BASE_URL + canonical_path
     image = f"{settings.PUBLIC_BASE_URL}/api/cards/{aid}/og.png"
-    org = {"@type": "Organization", "name": "Contraste", "url": settings.PUBLIC_BASE_URL,
+    org = {"@type": "Organization", "name": "COntraste", "url": settings.PUBLIC_BASE_URL,
            "logo": {"@type": "ImageObject", "url": f"{settings.PUBLIC_BASE_URL}/static/logo.png", "width": 512, "height": 512}}
     claim_review = None
     if row["status"] == "listed":
@@ -882,7 +889,7 @@ def feed():
         f"<guid>{xml_escape(settings.PUBLIC_BASE_URL + '/v/' + r['id'])}</guid>"
         f"<pubDate>{format_datetime(datetime.fromisoformat(r['created_at']))}</pubDate>"
         f"<description>{xml_escape(json.loads(r['result'])['headline'])}</description></item>" for r in rows)
-    return Response('<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>Contraste</title>'
+    return Response('<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>COntraste</title>'
                     f"<link>{settings.PUBLIC_BASE_URL}/</link><description>Verificaciones publicadas</description>"
                     f"<language>es-co</language>{items}</channel></rss>", media_type="application/rss+xml")
 

@@ -1,8 +1,8 @@
-# Contraste
+# COntraste
 
-Verificador de desinformación para Colombia y archivo público de verificaciones. Una persona pega un enlace (YouTube, X, TikTok, Instagram, Facebook o una noticia), sube una captura o escribe una afirmación. Contraste obtiene el contenido, separa lo verificable, lo investiga en fuentes públicas y entrega primero una **tarjeta lista para compartir** y después el detalle: afirmaciones, tabla de evidencia, cronología y fuentes.
+Verificador de desinformación para Colombia y archivo público de verificaciones. Una persona pega un enlace (YouTube, X, TikTok, Instagram, Facebook o una noticia), sube una captura o escribe una afirmación. COntraste obtiene el contenido, separa lo verificable, lo investiga en fuentes públicas y entrega primero una **tarjeta lista para compartir** y después el detalle: afirmaciones, tabla de evidencia, cronología y fuentes.
 
-Contraste es gratis. Leer todo y consultar algo ya verificado no necesita cuenta. Pedir una verificación nueva o aportar evidencia necesita una cuenta (enlace por correo o Google, sin contraseñas), con un límite de verificaciones al mes y al día. No hay comentarios, votos, perfiles públicos ni nombres: ningún artículo muestra quién lo pidió. La única voz es la evidencia.
+COntraste es gratis. Leer todo y consultar algo ya verificado no necesita cuenta. Pedir una verificación nueva o aportar evidencia necesita una cuenta (enlace por correo o Google, sin contraseñas), con un límite de verificaciones al mes y al día. No hay comentarios, votos, perfiles públicos ni nombres: ningún artículo muestra quién lo pidió. La única voz es la evidencia.
 
 ## 1. Configurar
 
@@ -82,7 +82,7 @@ Capturas de referencia en `docs/capturas/` (375 px y 1440 px).
 
 ## 4. Cuentas y límites
 
-Contraste es gratis: nadie paga por usarlo. Para cuidar el gasto en modelos, cada cuenta tiene un límite de verificaciones nuevas.
+COntraste es gratis: nadie paga por usarlo. Para cuidar el gasto en modelos, cada cuenta tiene un límite de verificaciones nuevas.
 
 - **Límites.** 1 verificación nueva = 1 crédito; consultar algo ya verificado no gasta. Cada cuenta con correo verificado (y que no sea de un dominio desechable de `disposable_domains.txt`) recibe `FREE_MONTHLY_CREDITS` el 1 de cada mes (hora de Colombia); no se acumulan. Además hay un máximo por día (`DAILY_CHECKS`, día de Colombia). El editor cambia ambos en `/admin/negocio` → Configuración; si sube el mensual a mitad de mes, todas las cuentas reciben la diferencia.
 - **Devoluciones.** Si la verificación falla por nuestro lado o se rechaza antes de gastar en modelos, la verificación se devuelve sola y no cuenta para el límite del día. Si ya se gastó en analizarla (leer una imagen, el modelo principal), el mensaje dice por qué se descontó.
@@ -90,6 +90,7 @@ Contraste es gratis: nadie paga por usarlo. Para cuidar el gasto en modelos, cad
 - **Encuesta** (`/encuesta`, resultados en `/admin/encuesta` y CSV). Se ofrece después de la segunda verificación terminada o al acabarse las del mes, una vez por cuenta, con verificaciones de regalo. Mide si el producto es imprescindible (pregunta de Sean Ellis: 40 % o más de "muy decepcionado" es la referencia), para qué lo usan y qué mejorar primero.
 - **Aportar evidencia.** Al final de cada artículo. Usa 1 verificación; si la fuente cambia la calificación o agrega información, el artículo se actualiza ("Actualizado el …: nueva evidencia aportada por un lector"), se devuelve y se regala una extra. Si un artículo recibe 5 aportes en 24 horas, los siguientes se congelan y los decide un editor en `/admin/negocio`.
 - **Límite de gasto.** Se registra el costo real de cada llamada al modelo (por día y por verificación).
+- **Verificaciones del día.** COntraste verifica por su cuenta `AUTO_CHECKS_PER_DAY` historias al día (5 por defecto; el editor lo cambia en `/admin/negocio`, 0 las apaga), repartidas de 7 a. m. a 7 p. m. Cada una se elige entre los titulares de Colombia de ese momento (`app/news.py`): el modelo rápido toma la afirmación más importante y verificable de un actor público, y se descarta lo ya verificado o elegido ese día. Siguen las mismas reglas que cualquier verificación, cuentan para el límite de gasto diario y el artículo dice que la eligió COntraste.
 
 ## 5. Pruebas
 
@@ -198,8 +199,36 @@ Se actualizan cada 30 minutos en segundo plano (una sola réplica) y se guardan 
 - **La calificación "Engañoso"** en el caso de fuentes en desacuerdo es una decisión conservadora del servidor; el editor puede corregirla desde `/admin` y queda en el historial público.
 - **Límites por conexión detrás de un proxy o túnel.** El límite de 3 cuentas nuevas por conexión al día usa la IP que ve la app. Detrás de Cloudflare Tunnel o un balanceador, pon `FORWARDED_ALLOW_IPS=*` en `.env` (uvicorn tomará la IP de `X-Forwarded-For`); si no, todas las visitas parecen venir de la misma IP.
 
-## 9. Aportar y licencia
+<a id="modelos"></a>
+## 9. Por qué estos modelos
 
-Contraste es software libre bajo la [GNU Affero General Public License v3.0](LICENSE): puedes usarlo, estudiarlo, modificarlo y montarlo, y si ofreces una versión modificada como servicio web debes ofrecer su código fuente a quienes la usan (`SOURCE_URL` pone el enlace en el pie de página).
+COntraste usa modelos de **DeepSeek** y de **Qwen** (Alibaba), dos empresas chinas, a través de OpenRouter, y **Jev** (TypeSafe) para el filtro de entrada. Es una decisión deliberada. Estas son las razones y sus límites.
+
+**El modelo no decide la calificación.** El modelo lee las fuentes y propone; las reglas fijas de `app/rules.py` deciden. Ninguna afirmación queda como verdadera o falsa sin al menos dos fuentes independientes (de dueños distintos) que lo digan, y cada cita tiene que aparecer textualmente en una página que COntraste descargó en esa misma verificación. Las partes interesadas no cuentan como confirmación. El modelo no puede agregar hechos que no estén en las fuentes. Así, el sesgo que pueda tener un modelo, venga de donde venga, tiene poco margen: para inclinar un resultado tendría que inventar citas, y las citas inventadas se descartan.
+
+**Costo.** COntraste es gratis, y cada verificación hace decenas de llamadas al modelo. Precios en OpenRouter en octubre de 2026, en dólares por millón de tokens (entrada / salida):
+
+| Modelo | Uso en COntraste | Precio |
+|---|---|---|
+| `deepseek/deepseek-v4-pro` | Separar afirmaciones y veredicto | 0,21 / 0,42 |
+| `deepseek/deepseek-v4-flash` | Leer cada fuente | 0,03 / 0,06 |
+| `qwen/qwen3.7-flash` | Leer imágenes | 0,03 / 0,13 |
+| `anthropic/claude-haiku-4.5` | (alternativa) | 1,00 / 5,00 |
+| `google/gemini-2.5-flash` | (alternativa) | 0,30 / 2,50 |
+| `anthropic/claude-sonnet-5.5` | (alternativa) | 2,00 / 10,00 |
+
+Con esta combinación una verificación cuesta entre US$0,005 y 0,01. Con modelos equivalentes de empresas estadounidenses costaría entre 5 y 20 veces más, y el servicio no podría seguir siendo gratis.
+
+**Calidad medida, no supuesta.** Antes de cambiar de modelo los comparamos con casos reales, sin publicar nada: las mismas 21 afirmaciones de 9 verificaciones, con la misma evidencia, cambiando solo el modelo. El modelo actual coincidió en el 90 % con alguna de las dos pasadas del anterior; el anterior coincidía consigo mismo en el 76 %. Para las imágenes, Qwen leyó el 100 % del texto de las capturas de prueba; `google/gemini-2.5-flash-lite` falló el formato de respuesta en 3 de 4 y quedó descartado.
+
+**Lo que sí hay que vigilar:**
+
+- **Censura.** Los modelos entrenados en China evitan o suavizan temas sensibles para el gobierno chino (Tiananmén, Taiwán, Xinjiang, el Partido Comunista). En un verificador colombiano esos temas son raros. Si una verificación los toca, las reglas de evidencia siguen aplicando, pero revísala con más cuidado y repórtala si ves un sesgo.
+- **Datos.** A los modelos solo llega contenido público: lo que la persona pegó o subió y las páginas que se consultan. Nunca correos, nombres de usuarios ni direcciones IP. OpenRouter envía cada llamada a un proveedor que sirve el modelo; revisa sus políticas si montas tu propia copia.
+- **Nada está atado.** Los modelos se cambian con `OPENROUTER_MODEL`, `OPENROUTER_FAST_MODEL` y `OPENROUTER_VISION_MODEL`. Si encuentras uno que verifique mejor por el mismo costo, abre un *issue* con tu comparación sobre casos reales.
+
+## 10. Aportar y licencia
+
+COntraste es software libre bajo la [GNU Affero General Public License v3.0](LICENSE): puedes usarlo, estudiarlo, modificarlo y montarlo, y si ofreces una versión modificada como servicio web debes ofrecer su código fuente a quienes la usan (`SOURCE_URL` pone el enlace en el pie de página).
 
 Para aportar, lee [CONTRIBUTING.md](CONTRIBUTING.md). Si una verificación publicada está mal, abre un *issue* con la plantilla «Verificación incorrecta». Las vulnerabilidades se reportan en privado: [SECURITY.md](SECURITY.md). La convivencia sigue el [Código de Conducta](CODE_OF_CONDUCT.md).

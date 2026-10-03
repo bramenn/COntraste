@@ -153,18 +153,18 @@ async def turnstile_ok(token: str | None, req: Request, action: str) -> bool:
 def _magic_html(link: str) -> str:
     """Sign-in email. Table layout and inline styles so it looks the same in every client."""
     return f"""<!doctype html><html lang="es"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1"><title>Entra a Contraste</title></head>
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>Entra a COntraste</title></head>
 <body style="margin:0;padding:0;background:#e9e2d0;">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#e9e2d0;padding:24px 12px;">
 <tr><td align="center">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#faf6ec;border:1px solid #cdbfa0;">
     <tr><td style="padding:26px 32px 8px;text-align:center;font-family:Georgia,'Times New Roman',serif;">
-      <div style="font-size:34px;line-height:1;color:#1c1a17;letter-spacing:.5px;">Contraste</div>
+      <div style="font-size:34px;line-height:1;color:#1c1a17;letter-spacing:.5px;">COntraste</div>
       <div style="height:6px;margin:12px auto 6px;width:150px;background:#f2c200;border-top:2px solid #10306e;border-bottom:2px solid #c8102e;"></div>
       <div style="font-style:italic;color:#6b6250;font-size:14px;">Verifica antes de compartir</div>
     </td></tr>
     <tr><td style="padding:18px 32px 0;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#2a271f;">
-      <p style="margin:0 0 14px;font-size:17px;line-height:1.55;">Hola. Pulsa el botón para entrar a tu cuenta de Contraste.</p>
+      <p style="margin:0 0 14px;font-size:17px;line-height:1.55;">Hola. Pulsa el botón para entrar a tu cuenta de COntraste.</p>
     </td></tr>
     <tr><td align="center" style="padding:6px 32px 4px;">
       <a href="{link}" style="display:inline-block;background:#1c1a17;color:#faf6ec;text-decoration:none;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-weight:700;font-size:16px;padding:14px 30px;border-radius:2px;">Entrar en Contraste</a>
@@ -178,7 +178,7 @@ def _magic_html(link: str) -> str:
     </td></tr>
   </table>
   <div style="max-width:520px;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#8a8069;font-size:11px;padding:12px;text-align:center;">
-    Contraste · Verificación de datos para Colombia
+    COntraste · Verificación de datos para Colombia
   </div>
 </td></tr></table></body></html>"""
 
@@ -216,9 +216,9 @@ async def magic_request(request: Request, email: str = Form(...), consent: str =
     db.q("INSERT INTO login_tokens VALUES(%s,%s,%s,%s, now() + make_interval(secs => %s), NULL)",
          _hash(token), email, safe_next(next), consent in ("1", "on", "true"), LINK_TTL)
     link = f"{settings.PUBLIC_BASE_URL}/auth/magic/{token}"
-    body = f"Hola.\n\nPara entrar a Contraste abre este enlace (vence en 15 minutos y sirve una sola vez):\n{link}\n\n" \
+    body = f"Hola.\n\nPara entrar a COntraste abre este enlace (vence en 15 minutos y sirve una sola vez):\n{link}\n\n" \
            "Si no lo pediste, ignora este correo."
-    await asyncio.to_thread(_send_mail, email, "Tu enlace para entrar a Contraste", body, _magic_html(link))
+    await asyncio.to_thread(_send_mail, email, "Tu enlace para entrar a COntraste", body, _magic_html(link))
     return {"ok": True}
 
 

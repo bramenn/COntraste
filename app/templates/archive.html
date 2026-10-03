@@ -2,7 +2,7 @@
 {% from "_m.html" import cardx %}
 {% set nav = 'archivo' %}
 {% set noindex = q or page_num > 1 %}
-{% block title %}{% if topic %}{{ TOPICS[topic] }}: verificaciones{% elif rating %}{{ RATINGS[rating] }}: verificaciones{% else %}Archivo de verificaciones{% endif %} · Contraste{% endblock %}
+{% block title %}{% if topic %}{{ TOPICS[topic] }}: verificaciones{% elif rating %}{{ RATINGS[rating] }}: verificaciones{% else %}Archivo de verificaciones{% endif %} · COntraste{% endblock %}
 {% block head %}<link rel="canonical" href="{{ BASE }}/archivo{% if topic %}?tema={{ topic }}{% elif rating %}?calificacion={{ rating }}{% endif %}">{% endblock %}
 {% block main %}
 <div class="wrap">

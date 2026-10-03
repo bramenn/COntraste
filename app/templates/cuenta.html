@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Tu cuenta · Contraste{% endblock %}
+{% block title %}Tu cuenta · COntraste{% endblock %}
 {% set KIND = {"monthly_grant": "Verificaciones del mes", "spend": "Uso", "refund": "Devolución", "reward": "Premio por aporte aceptado", "admin_adjust": "Ajuste"} %}
 {% set CSTATUS = {"queued": "En revisión", "frozen": "En revisión por el equipo", "review": "En revisión por el equipo", "accepted": "Aceptado", "rejected": "No aceptado"} %}
 {% block main %}
@@ -12,7 +12,7 @@
     <div><b>{{ balance.extra }}</b><span>de regalo, no vencen</span></div>{% endif %}
     <div><b>{{ [daily_limit() - used_today, 0]|max }}</b><span>disponibles hoy</span></div>
   </div></div>
-  <p class="muted">Contraste es gratis. Cada mes tienes {{ free_credits() }} verificaciones, hasta {{ daily_limit() }} por día; se renuevan el {{ renews_on() }}. Consultar algo que ya está verificado no gasta.</p>
+  <p class="muted">COntraste es gratis. Cada mes tienes {{ free_credits() }} verificaciones, hasta {{ daily_limit() }} por día; se renuevan el {{ renews_on() }}. Consultar algo que ya está verificado no gasta.</p>
   {% if no_credits %}<p class="note warn">Usaste tus verificaciones de este mes. Vuelven el {{ renews }}. Mientras tanto puedes consultar todo el archivo.</p>{% endif %}
 
   <h2>Tus verificaciones</h2>

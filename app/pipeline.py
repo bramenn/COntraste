@@ -50,7 +50,7 @@ CHECKABLE = {"afirmacion", "pregunta_sobre_hecho", "opinion_o_satira_publica"}
 # Every rejection says what we found and whether the verification was charged. Rule: if we stop before any costly
 # analysis it is not charged (run_job adds "No se descontó de tu saldo"); once the image was read or the main model
 # ran, it is charged (Charged) and the message says why.
-NOT_A_CLAIM = ("No lo verificamos: no encontramos nada que se presente como un hecho. Contraste verifica noticias, "
+NOT_A_CLAIM = ("No lo verificamos: no encontramos nada que se presente como un hecho. COntraste verifica noticias, "
                "rumores, titulares, cifras y mensajes sobre asuntos públicos; no responde preguntas generales ni hace tareas.")
 NOT_RELATED = ("No lo verificamos: parece un asunto local de otro país, sin relación con Colombia ni con temas que "
                "afecten a cualquiera (salud, ciencia, tecnología, estafas, hechos internacionales de gran alcance).")
@@ -62,7 +62,7 @@ KIND_REASON = {
     "personal": "trata de un asunto privado de una persona, no de un asunto público",
     "publicidad_u_otro": "parece publicidad o un contenido sin afirmaciones sobre hechos",
 }
-NOT_CHECKABLE = ("No lo verificamos: {reason}. Contraste verifica afirmaciones sobre asuntos públicos que circulan "
+NOT_CHECKABLE = ("No lo verificamos: {reason}. COntraste verifica afirmaciones sobre asuntos públicos que circulan "
                  "como hechos.")
 
 

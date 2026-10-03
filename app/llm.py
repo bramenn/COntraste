@@ -318,7 +318,7 @@ async def _post(body: dict) -> httpx.Response:
         async with httpx.AsyncClient(timeout=180) as client:
             return await client.post("https://openrouter.ai/api/v1/chat/completions", json=body,
                                      headers={"Authorization": f"Bearer {settings.OPENROUTER_API_KEY}",
-                                              "HTTP-Referer": settings.PUBLIC_BASE_URL, "X-Title": "Contraste"})
+                                              "HTTP-Referer": settings.PUBLIC_BASE_URL, "X-Title": "COntraste"})
     except httpx.HTTPError as e:
         raise LLMError(f"No hay conexión con el servicio de análisis ({type(e).__name__}).")
 

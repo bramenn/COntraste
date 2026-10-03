@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Gracias por revisar. Muchas reglas de Contraste nacieron de reportes como este.
+        Gracias por revisar. Muchas reglas de COntraste nacieron de reportes como este.
         No incluyas datos personales de nadie (teléfonos, direcciones, documentos).
   - type: input
     id: url

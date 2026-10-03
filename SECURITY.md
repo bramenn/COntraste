@@ -3,7 +3,7 @@
 ## Cómo reportar una vulnerabilidad
 
 **No abras un *issue* público.** Repórtala en privado con el botón «Report a vulnerability» de la pestaña
-*Security* de este repositorio, o escribe a bramendev@gmail.com con el asunto «Seguridad Contraste».
+*Security* de este repositorio, o escribe a bramendev@gmail.com con el asunto «Seguridad COntraste».
 
 Incluye qué encontraste, cómo reproducirlo y qué impacto crees que tiene. Respondemos en un máximo de 7 días y te
 mantenemos al tanto hasta corregirlo. Si quieres, te damos crédito en el cambio que lo corrige.

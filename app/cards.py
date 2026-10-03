@@ -133,7 +133,7 @@ async def screenshot(html: str, w: int, h: int, *, full: bool = False, jpeg: boo
 
 
 CAUTION = "Verificación preliminar · no publicada en portada"
-DESIGN = "futuro2"  # change it when card.html changes, so every replica renders the cards again
+DESIGN = "co1"  # change it when card.html changes, so every replica renders the cards again
 
 
 async def render_card(result: dict, aid: str, created_at: str, fmt: str, caution: str | None = None) -> bytes:

@@ -379,3 +379,14 @@ def test_a_degraded_reinvestigation_does_not_replace_the_published_check(client,
     row = db.get(aid)
     assert json.loads(row["result"])["sources"] == old["sources"] and row["rating"] == old["rating"]
     assert not row["reinvestigating"]
+
+
+def test_the_site_points_to_its_open_source_code(client):
+    """AGPL: the people using the site can reach its source. Each check links to a public report form that
+    already carries its address."""
+    from app import settings
+    aid = _new_article()
+    row = db.get(aid)
+    assert settings.SOURCE_URL in client.get("/").text and 'id="codigo-abierto"' in client.get("/como-funciona").text
+    page = client.get(db.path_of(row)).text
+    assert "issues/new?template=verificacion-incorrecta.yml" in page and "url=http" in page

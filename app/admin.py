@@ -62,9 +62,10 @@ def business(request: Request, msg: str = ""):
                             c.pending->>'rating' AS new_rating, o.title AS origin_title
                      FROM contributions c JOIN articles a ON a.id=c.article_id LEFT JOIN articles o ON o.id=c.origin
                      WHERE c.status IN ('frozen', 'review') ORDER BY c.created_at""")
-    from . import credits, survey
+    from . import auto, credits, survey
     return _page("admin.html", view="business", csrf=csrf, spend=spend_status(), avg=avg, frozen=frozen, msg=msg,
-                 free_n=credits.free_monthly(), daily_n=credits.daily_limit(), survey_reward=survey.reward_amount())
+                 free_n=credits.free_monthly(), daily_n=credits.daily_limit(), survey_reward=survey.reward_amount(),
+                 auto_n=auto.per_day())
 
 
 @router.get("/admin/encuesta", response_class=HTMLResponse)
@@ -95,16 +96,20 @@ async def business_act(request: Request, action: str):
     msg = ""
     if action == "settings":
         try:
-            free_n, daily_n, reward_n = (int(form.get(k, -1)) for k in ("free_monthly_credits", "daily_checks", "survey_reward"))
+            free_n, daily_n, reward_n, auto_n = (int(form.get(k, -1)) for k in
+                                                 ("free_monthly_credits", "daily_checks", "survey_reward", "auto_checks"))
         except ValueError:
-            free_n = daily_n = reward_n = -1
-        if not (0 <= free_n <= 100 and 1 <= daily_n <= 100 and 0 <= reward_n <= 20):
-            msg = "Usa entre 0 y 100 verificaciones al mes, entre 1 y 100 por día y entre 0 y 20 de premio por la encuesta."
+            free_n = daily_n = reward_n = auto_n = -1
+        if not (0 <= free_n <= 100 and 1 <= daily_n <= 100 and 0 <= reward_n <= 20 and 0 <= auto_n <= 13):
+            msg = ("Usa entre 0 y 100 verificaciones al mes, entre 1 y 100 por día, entre 0 y 20 de premio por la encuesta "
+                   "y entre 0 y 13 verificaciones del día.")
         else:
             db.set_setting("free_monthly_credits", free_n)
             db.set_setting("daily_checks", daily_n)
             db.set_setting("survey_reward", reward_n)
-            msg = f"Guardado: {free_n} verificaciones al mes, {daily_n} por día, {reward_n} de premio por la encuesta."
+            db.set_setting("auto_checks", auto_n)
+            msg = (f"Guardado: {free_n} verificaciones al mes, {daily_n} por día, {reward_n} de premio por la encuesta, "
+                   f"{auto_n} verificaciones del día elegidas por COntraste.")
     elif action in ("adjust", "block", "unblock"):
         user = db.q1("SELECT * FROM users WHERE email=%s", str(form.get("email", "")).strip().lower())
         if not user:

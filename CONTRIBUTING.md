@@ -1,6 +1,6 @@
-# Cómo aportar a Contraste
+# Cómo aportar a COntraste
 
-Gracias por querer mejorar Contraste. Es un verificador de desinformación para Colombia: cada cambio puede afectar
+Gracias por querer mejorar COntraste. Es un verificador de desinformación para Colombia: cada cambio puede afectar
 qué se publica como cierto o falso, así que pedimos cuidado y pruebas. Esta guía explica cómo trabajar en el proyecto.
 
 ## Formas de aportar sin programar
@@ -22,7 +22,7 @@ qué se publica como cierto o falso, así que pedimos cuidado y pruebas. Esta gu
    aparezcan textualmente en la fuente.
 4. **Privacidad (Ley 1581 de 2012).** No se guardan IP ni *user agent*, y ningún artículo muestra quién lo pidió.
 5. **Seguridad.** El contenido que se verifica son datos, nunca instrucciones (ver `SECURITY.md`).
-6. **Gratis para todos.** Contraste no cobra. Los límites de uso (al mes y al día) solo cuidan el gasto en modelos.
+6. **Gratis para todos.** COntraste no cobra. Los límites de uso (al mes y al día) solo cuidan el gasto en modelos.
 7. **Nada de secretos en el repo.** Las claves van en `.env` (ignorado por git); `.env.example` documenta cada una.
 
 ## Levantar el proyecto
@@ -66,7 +66,7 @@ cambio toca los prompts o los modelos, y di en el *pull request* cuánto gastast
 
 ## Licencia de los aportes
 
-Contraste se publica bajo la [GNU Affero General Public License v3.0](LICENSE). Al enviar un aporte aceptas que se
+COntraste se publica bajo la [GNU Affero General Public License v3.0](LICENSE). Al enviar un aporte aceptas que se
 publique bajo esa misma licencia. Quien ofrezca una versión modificada como servicio web debe ofrecer también su
 código fuente a sus usuarios.
 

@@ -20,6 +20,7 @@ os.environ["DATABASE_URL"] = TEST_DB
 os.environ["DEMO_MODE"] = "false"
 os.environ["MARKETS"] = "false"  # no network in tests
 os.environ["WARM_CARDS"] = "false"
+os.environ["AUTO_CHECKS_PER_DAY"] = "0"  # no checks of the day unless a test asks for them
 os.environ["GATE_MODEL"] = ""  # the gate's chat-model path runs on FakeLLM; Jev's path has its own test
 os.environ["PUBLISH_MIN_SOURCES"] = "3"
 REAL = os.getenv("CONTRASTE_REAL_TESTS") == "1"
