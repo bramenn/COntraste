@@ -1,5 +1,6 @@
-"""Checks chosen by COntraste: every day a few of the stories moving Colombia at that moment are checked on
-their own, so the site always has something new even when nobody asks.
+"""Checks chosen by COntraste: every day a few of the stories dividing Colombia at that moment are checked on their
+own, so the site always has something new even when nobody asks. Only stories that set Colombians against each other
+or travel distorted and without context (news.py marks them); if there is none, no check that slot.
 
 They are spread over the day (7 a.m. to 7 p.m., Colombian time), and each one is picked from the headlines
 of that moment (news.py refreshes them every 30 minutes). The fast model picks the story with the most
@@ -18,10 +19,13 @@ from .similar import SIMILAR_TEXT, cosine, embed, text_key
 log = logging.getLogger("contraste.auto")
 FIRST_HOUR, LAST_HOUR = 7, 19
 
-PICK_TASK = """Tarea: de la lista numerada de titulares de hoy en Colombia, elige el que contenga la afirmación más
-importante para verificar: algo que un actor (gobierno, político, entidad, empresa, figura pública) afirma o
-denuncia, con impacto público y que se pueda contrastar con fuentes (cifras, hechos, decisiones, acusaciones).
-Descarta deportes, farándula, loterías, clima, avisos de servicios, consejos y sucesos sin nada en disputa.
+PICK_TASK = """Tarea: de la lista numerada de titulares de hoy en Colombia, elige el que más divide al país o más se
+presta a circular distorsionado y sin contexto: lo que enfrenta a unos colombianos con otros y termina en peleas entre
+familiares y amigos (acusaciones, choques políticos, cifras usadas como arma, seguridad, paz, elecciones, salud,
+migración, rumores). Tiene que contener algo que un actor (gobierno, oposición, político, entidad, empresa, figura
+pública) afirma o denuncia y que se pueda contrastar con fuentes. Descarta lo rutinario aunque sea institucional
+(nombramientos o elecciones internas sin disputa), los deportes, la farándula, las loterías, el clima, los servicios y
+los consejos. Busca equilibrio: si lo ya elegido hoy viene de un mismo sector, prefiere lo que afirman otros.
 No elijas temas parecidos a los ya elegidos hoy. 'index' es el número elegido, o -1 si ninguno sirve.
 'claim' es la afirmación central tal como circula, en una frase, centrada en lo que afirma el actor
 (por ejemplo "El Gobierno denuncia que faltan $148.000 millones en RTVC"), no en lo que reporta el medio."""
@@ -65,6 +69,8 @@ async def tick():
     picked_embs = [embed(t) for t in picked]
     candidates = []
     for item in (db.setting("trending", {}) or {}).get("items", []):
+        if not item.get("divisive"):  # only the stories that divide the country, never filler
+            continue
         e = embed(item["title"])
         # Already checked, or the same story as one picked today.
         if db.find_duplicate(text_key=text_key(item["title"]), emb=e) or any(cosine(p.tobytes(), e) >= SIMILAR_TEXT for p in picked_embs):

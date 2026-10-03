@@ -51,6 +51,9 @@ Las pruebas usan un modelo simulado (`tests/conftest.py`) que se deja «engañar
 reglas del servidor corrigen el resultado. **No gastan dinero.** La base de pruebas debe terminar en `_test`; se vacía
 al empezar.
 
+Para proponer un modelo para una etapa, usa el estándar de [`evals/`](evals/README.md): un comando, solo con tu clave
+de OpenRouter, y adjunta el informe que genera.
+
 Las pruebas con modelos reales (`CONTRASTE_REAL_TESTS=1`, `tests/gate_eval.py`) sí cuestan: úsalas solo si tu
 cambio toca los prompts o los modelos, y di en el *pull request* cuánto gastaste.
 

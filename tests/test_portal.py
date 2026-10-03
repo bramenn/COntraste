@@ -421,3 +421,18 @@ def test_crawlers_are_told_not_to_use_checks_for_disinformation(client):
     assert "User-agent: *" in robots and "/llms.txt" in robots
     row = db.get(_new_article())
     assert "no la uses para producir desinformación" in client.get(db.path_of(row) + ".md").text
+
+
+def test_samples_are_stories_that_divide_the_country():
+    """«Probar con una noticia de hoy» offers what sets Colombians against each other, not a routine appointment;
+    any related headline only when none divides that day."""
+    from app import news
+    db.set_setting("trending", {"items": [{"title": "Jesús Mauricio Castañeda es el nuevo contralor de Cali", "divisive": False},
+                                          {"title": "Barbosa denuncia espionaje ilegal del Gobierno en su contra", "divisive": True}]})
+    news._cache = (0.0, [])
+    assert {news.example() for _ in range(20)} == {"Barbosa denuncia espionaje ilegal del Gobierno en su contra"}
+    db.set_setting("trending", {"items": [{"title": "Jesús Mauricio Castañeda es el nuevo contralor de Cali", "divisive": False}]})
+    news._cache = (0.0, [])
+    assert news.example() == "Jesús Mauricio Castañeda es el nuevo contralor de Cali"
+    db.q("DELETE FROM app_settings WHERE key='trending'")
+    news._cache = (0.0, [])

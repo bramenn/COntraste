@@ -43,20 +43,29 @@ def parse(xml: str) -> list[dict]:
 
 class Related(BaseModel):
     related: list[int] = []
+    divisive: list[int] = []
 
 
 RELATED_TASK = """Tarea: de la lista numerada de titulares, devuelve en 'related' los números de los que tienen relación
 con Colombia de cualquier forma: ocurren en Colombia, involucran a colombianos o a instituciones, empresas, regiones o
 figuras públicas colombianas, o afectan directamente al país (por ejemplo, una decisión de otro país sobre Colombia o lo
-que pasa en la frontera). Deja fuera los que no tienen ninguna relación con Colombia."""
+que pasa en la frontera). Deja fuera los que no tienen ninguna relación con Colombia.
+En 'divisive' devuelve, de esos, solo los que dividen a los colombianos o se distorsionan fácilmente sin contexto: los que
+enfrentan a unos con otros y terminan en peleas entre familiares y amigos. Por ejemplo: acusaciones de corrupción o de
+delitos contra figuras públicas; choques entre gobierno y oposición; afirmaciones sobre seguridad, conflicto armado,
+paz o víctimas; cifras de economía, empleo, salud o pobreza usadas para defender o atacar a alguien; elecciones y fraude;
+migración, regiones o grupos puestos unos contra otros; salud y vacunas; rumores virales. Deja fuera lo rutinario aunque
+sea institucional (un nombramiento o una elección interna sin disputa, como «X es el nuevo contralor de Cali»), los
+servicios, el tránsito, el clima, los deportes, la farándula, las loterías, los eventos y los consejos."""
 
 
 async def colombian(items: list[dict], about: set[str]) -> list[dict]:
     """Keep the headlines related to Colombia. `about` holds the titles from the Colombia search, the fallback."""
     listed = "\n".join(f"[{i}] {it['title']}" for i, it in enumerate(items))
     try:
-        keep = set((await llm.ask(RELATED_TASK, listed, Related, fast=True)).related)
-        return [it for i, it in enumerate(items) if i in keep]
+        r = await llm.ask(RELATED_TASK, listed, Related, fast=True)
+        keep, divisive = set(r.related), set(r.divisive)
+        return [it | {"divisive": i in divisive} for i, it in enumerate(items) if i in keep]
     except Exception as e:
         log.warning("could not classify headlines (%s); keeping only the Colombia search", e)
         return [it for it in items if it["title"] in about]
@@ -89,7 +98,9 @@ def example() -> str:
     """A headline of the moment, a different one each time; the old sample if none is available."""
     global _cache
     if time.monotonic() - _cache[0] > 60 or not _cache[1]:  # an empty list is re-read: headlines may have just arrived
-        _cache = (time.monotonic(), (db.setting("trending", {}) or {}).get("items", []))
+        items = (db.setting("trending", {}) or {}).get("items", [])
+        # Samples are the stories that divide the country, not any headline; any related one if none today.
+        _cache = (time.monotonic(), [it for it in items if it.get("divisive")] or items)
     return random.choice(_cache[1])["title"] if _cache[1] else FALLBACK
 
 

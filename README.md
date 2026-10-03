@@ -219,6 +219,8 @@ COntraste usa modelos de **DeepSeek** y de **Qwen** (Alibaba), dos empresas chin
 
 Con esta combinación una verificación cuesta entre US$0,005 y 0,01. Con modelos equivalentes de empresas estadounidenses costaría entre 5 y 20 veces más, y el servicio no podría seguir siendo gratis.
 
+**Un estándar público para elegir.** Cada etapa tiene casos de prueba, mínimos y errores críticos que ningún modelo puede cometer: [`evals/`](evals/README.md). Un modelo es elegible cuando pasa; cualquiera puede repetir la prueba con un comando y proponer otro con el informe.
+
 **Calidad medida, no supuesta.** Antes de cambiar de modelo los comparamos con casos reales, sin publicar nada: las mismas 21 afirmaciones de 9 verificaciones, con la misma evidencia, cambiando solo el modelo. El modelo actual coincidió en el 90 % con alguna de las dos pasadas del anterior; el anterior coincidía consigo mismo en el 76 %. Para las imágenes, Qwen leyó el 100 % del texto de las capturas de prueba; `google/gemini-2.5-flash-lite` falló el formato de respuesta en 3 de 4 y quedó descartado.
 
 **Lo que sí hay que vigilar:**

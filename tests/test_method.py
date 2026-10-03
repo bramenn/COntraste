@@ -441,3 +441,22 @@ def test_the_central_claim_decides_the_overall_rating():
     assert focus_rating([c | {"central": False} for c in claims]) == "enganoso"
     assert focus_rating(claims[:2] + [{"rating": "no_verificable", "central": True}]) == "verdadero"
     assert focus_rating(claims[:2]) == "verdadero"
+
+
+def test_the_model_standard_cases_are_well_formed():
+    """evals/: every case has its right answer and only uses labels the app accepts, so the standard can be run
+    by anyone and means the same everywhere."""
+    from typing import get_args
+    from app import llm
+    from evals import cases
+    stances = set(get_args(llm.Evidence.model_fields["stance"].annotation))
+    ratings = set(get_args(llm.ClaimVerdict.model_fields["rating"].annotation))
+    kinds = set(get_args(llm.Extraction.model_fields["input_kind"].annotation))
+    for c in cases.SOURCES:
+        assert len(c["expect"]) == len(c["claims"]) and set(c["expect"]) <= stances, c["id"]
+    for c in cases.VERDICT:
+        assert c["ok"] and c["ok"] <= ratings, c["id"]
+    for c in cases.EXTRACTION:
+        assert c["kind"] <= kinds, c["id"]
+    assert all(c["lines"] for c in cases.IMAGES)
+    assert len({c["id"] for c in cases.SOURCES}) == len(cases.SOURCES)

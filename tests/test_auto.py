@@ -23,9 +23,11 @@ def test_picks_a_new_story_skips_what_was_checked_and_waits_for_the_next_slot(mo
     db.save_article(example(0) | {"circulating": checked}, status="listed", reason=None,
                     keys={"text_key": __import__("app.similar", fromlist=["text_key"]).text_key(checked)})
     db.set_setting("trending", {"items": [
-        {"title": "Lotería de Bogotá: resultados del sorteo del jueves 1 de octubre", "source": "Blu Radio"},
-        {"title": checked, "source": "El Colombiano"},
-        {"title": "Francisco Barbosa anuncia acción penal por presunto espionaje ilegal en su contra", "source": "Semana"}]})
+        {"title": "Lotería de Bogotá: resultados del sorteo del jueves 1 de octubre", "source": "Blu Radio", "divisive": False},
+        {"title": "Jesús Mauricio Castañeda es el nuevo contralor de Cali", "source": "El País", "divisive": False},
+        {"title": checked, "source": "El Colombiano", "divisive": True},
+        {"title": "Francisco Barbosa anuncia acción penal por presunto espionaje ilegal en su contra", "source": "Semana",
+         "divisive": True}]})
     eight = db.today_co().replace(hour=8, minute=0)
     monkeypatch.setattr(db, "today_co", lambda: eight)
     shown = []
@@ -41,6 +43,7 @@ def test_picks_a_new_story_skips_what_was_checked_and_waits_for_the_next_slot(mo
         assert len(jobs) == 1 and jobs[0]["input"]["text"].startswith("Francisco Barbosa denuncia")
         assert jobs[0]["input"]["source"] == "Semana" and jobs[0]["input"]["keys"]["text_key"]
         assert "RTVC" not in shown[0]                      # already checked: never offered
+        assert "Lotería" not in shown[0] and "contralor" not in shown[0]   # only stories that divide the country
         asyncio.run(auto.tick())                           # 8 a.m.: only the 7 a.m. slot is due
         assert len(db.q("SELECT 1 FROM jobs WHERE input->>'auto' = 'true'")) == 1
     finally:
