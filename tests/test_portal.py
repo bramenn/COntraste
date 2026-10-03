@@ -406,6 +406,7 @@ def test_a_check_continues_in_an_ai_assistant(client):
     page = client.get(db.path_of(row)).text
     q = urllib.parse.unquote(page.split("https://claude.ai/new?q=", 1)[1].split('"', 1)[0])
     assert q.startswith("Te comparto una verificación de COntraste") and r["title"] in q
+    assert "/?verificar=" in q and "cuenta solo lo que aporte algo nuevo" in q   # suggests checks, skips filler news
     assert "https://chatgpt.com/?q=" in page and 'id="ai-prompt"' in page
     huge = r | {"sources": [{"name": f"Medio {i}", "url": f"https://m{i}.co/n", "title": "x" * 200} for i in range(500)]}
     assert len(main.ai_prompt(row, huge)) < len(main.AI_ASK) + main.AI_MAX + 300

@@ -277,6 +277,10 @@
       lastInput = payload;
       submit(payload);
     });
+    // A link from an AI assistant (/?verificar=…) leaves the claim in the box, ready to check; it is never sent
+    // on its own, so nobody spends a check without meaning to.
+    const suggested = new URLSearchParams(location.search).get("verificar");
+    if (suggested && !q.value) { q.value = suggested.slice(0, 2000); grow(); q.focus(); }
     // Back from signing in: the text written before is waiting.
     const saved = draft.get();
     if (saved && !q.value) { q.value = saved; grow(); if (CSRF) { draft.clear(); form.requestSubmit(); } }

@@ -43,8 +43,13 @@ def main():
     p.add_argument("--dry-run", action="store_true")
     p.add_argument("--max-usd", type=float, default=settings.DAILY_SPEND_LIMIT_USD / 2)
     p.add_argument("--concurrency", type=int, default=2)
+    p.add_argument("--skip-since", help="ISO time: skip checks made or re-investigated after it (already on current rules)")
     a = p.parse_args()
-    ids = [r["id"] for r in db.q("SELECT id FROM articles WHERE status != 'removed' AND NOT demo ORDER BY created_at")]
+    t = a.skip_since
+    ids = [r["id"] for r in db.q("""SELECT id FROM articles a WHERE status != 'removed' AND NOT demo
+                                    AND (%s::timestamptz IS NULL OR NOT (a.created_at::timestamptz >= %s::timestamptz
+                                         OR EXISTS (SELECT 1 FROM followups f WHERE f.article_id = a.id AND f.at >= %s::timestamptz)))
+                                    ORDER BY created_at""", t, t, t)]
     print(f"{len(ids)} verificaciones · gasto hoy US${db.spend_today():.2f} · se detiene en US${a.max_usd:.2f}", flush=True)
     if a.dry_run:
         return

@@ -795,7 +795,10 @@ def short(aid: str):
 
 AI_ASK = ("Te comparto una verificación de COntraste, un verificador de desinformación de Colombia. Analízala con "
           "pensamiento crítico: ¿la evidencia sostiene cada calificación?, ¿qué falta?, ¿qué contraargumentos o fuentes "
-          "podrían cambiarla? Responde en español.\n\n")
+          "podrían cambiarla? Si buscas en la web, cuenta solo lo que aporte algo nuevo (un hecho, un documento, una "
+          "versión, una fecha); si lo que encuentras repite lo mismo, dilo en una línea en vez de enumerarlo. Si aparece "
+          "una afirmación concreta que valga la pena verificar, propónla como enlace listo para verificar en COntraste: "
+          "{base}/?verificar= seguido de la afirmación codificada para URL. Responde en español.\n\n")
 AI_MAX = 6000  # Markdown chars in a prefilled prompt: Claude cuts at ~14,000 and long links fail on some servers
 
 
@@ -824,7 +827,7 @@ def ai_prompt(row, r: dict) -> str:
     if len(md) > AI_MAX:
         md = md[:AI_MAX].rsplit("\n", 1)[0] + (f"\n\n(Resumen recortado. La verificación completa, en Markdown: "
                                               f"{settings.PUBLIC_BASE_URL}{db.path_of(row)}.md)\n")
-    return AI_ASK + md
+    return AI_ASK.format(base=settings.PUBLIC_BASE_URL) + md
 
 
 @app.get("/v/{year}/{month}/{slug_id}.md")
