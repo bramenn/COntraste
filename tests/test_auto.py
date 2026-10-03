@@ -57,3 +57,17 @@ def test_the_article_says_it_was_chosen_by_contraste():
     with TestClient(app) as client:
         page = client.get(db.path_of(db.get(aid))).text
     assert "Elegida por COntraste entre las noticias del día, a partir de un titular de Semana" in page
+
+
+def test_a_recent_check_gets_a_second_look_once_and_old_ones_are_left_alone():
+    """Stories in development change within hours: checks get a second look 6 and 24 hours after they were made.
+    Each pass runs once, and only within its window, so a deploy never re-investigates the archive."""
+    from datetime import timedelta
+    from app.demo import example
+    from app.main import page  # noqa: F401  (loads the app and its schema)
+    db.q("DELETE FROM followups")
+    fresh = db.save_article(example(0), status="listed", reason=None, keys={}, created_at=db.iso(db.now() - timedelta(hours=7)))
+    old = db.save_article(example(1), status="listed", reason=None, keys={}, created_at=db.iso(db.now() - timedelta(hours=40)))
+    due = [auto.due_followup() for _ in range(3)]
+    assert fresh in due and old not in due and due.count(fresh) == 1
+    db.q("DELETE FROM followups")

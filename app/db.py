@@ -125,6 +125,9 @@ CREATE TABLE IF NOT EXISTS leases(name TEXT PRIMARY KEY, holder TEXT NOT NULL, u
 CREATE TABLE IF NOT EXISTS app_settings(key TEXT PRIMARY KEY, value JSONB NOT NULL);
 
 -- One answer per account. On account deletion user_id becomes NULL and the answer stays anonymous.
+-- Second looks at a recent check (6 and 24 hours after it was made): one row per pass, so it runs once.
+CREATE TABLE IF NOT EXISTS followups(article_id TEXT NOT NULL, hours INTEGER NOT NULL,
+  at TIMESTAMPTZ NOT NULL DEFAULT now(), PRIMARY KEY (article_id, hours));
 -- One check a day without an account, per visitor. visitor is the salted daily hash (no IP); rows of
 -- past days are deleted.
 CREATE TABLE IF NOT EXISTS anon_checks(day TEXT NOT NULL, visitor TEXT NOT NULL, job_id TEXT NOT NULL,

@@ -90,6 +90,31 @@ async def tick():
     log.info("chose a check of the day: %s", claim)
 
 
+FOLLOW_HOURS = (6, 24)  # stories in development change within hours: the audios came out after the first check
+
+
+def due_followup() -> str | None:
+    """A check that reached 6 or 24 hours of age and has not had that pass, claimed so it runs once. Only checks
+    made within the window (up to 12 hours late), so a deploy never re-investigates the whole archive."""
+    for h in FOLLOW_HOURS:
+        row = db.q1("""INSERT INTO followups(article_id, hours)
+                       SELECT a.id, %s FROM articles a
+                       WHERE a.status <> 'removed' AND NOT a.demo
+                         AND a.created_at::timestamptz <= now() - make_interval(hours => %s)
+                         AND a.created_at::timestamptz > now() - make_interval(hours => %s)
+                         AND NOT EXISTS (SELECT 1 FROM followups f WHERE f.article_id = a.id AND f.hours = %s)
+                       ORDER BY a.created_at LIMIT 1
+                       ON CONFLICT DO NOTHING RETURNING article_id""", h, h, h + 12, h)
+        if row:
+            return row["article_id"]
+    return None
+
+
+def followup_allowed() -> bool:
+    cap = settings.DAILY_SPEND_LIMIT_USD
+    return not cap or db.spend_today() < 0.8 * cap  # second looks yield to the readers' own checks
+
+
 if __name__ == "__main__":
     # Five a day: 7, 10, 13, 16 and 19 h.
     assert [due_now(5, h) for h in (6.9, 7, 9.9, 10, 13, 18.9, 19, 23)] == [0, 1, 1, 2, 3, 4, 5, 5]

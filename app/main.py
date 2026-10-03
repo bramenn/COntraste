@@ -255,6 +255,11 @@ async def maintenance_loop():
                                 await auto.tick()
                             except Exception:
                                 log.exception("check of the day not started")
+                            # Second look at a recent check, in the background: it takes minutes, and this loop
+                            # also keeps the heartbeats of running jobs.
+                            if auto.followup_allowed() and (aid := await asyncio.to_thread(auto.due_followup)):
+                                log.info("second look at %s", aid)
+                                spawn(reinvestigate(aid))
             if settings.MARKETS and tick % 120 == 0:  # every ~30 minutes, one replica
                 with db.singleton(3) as mine:
                     if mine:

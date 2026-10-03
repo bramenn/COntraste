@@ -160,7 +160,7 @@ class ImageReading(BaseModel):
 # --- Prompts --------------------------------------------------------------------------------
 
 TODAY = """
-Fecha de hoy en Colombia: {today}. Tu conocimiento termina antes de esta fecha: lo que no conoces o es posterior
+Fecha de hoy en Colombia: {today}, {hour}. Tu conocimiento termina antes de esta fecha: lo que no conoces o es posterior
 a tu entrenamiento no es por eso futuro, falso ni sátira. Solo es futuro lo que es posterior a la fecha de hoy.
 Contrasta cada afirmación con lo que dicen las fuentes de ese momento."""
 
@@ -193,10 +193,17 @@ públicos, leyes, sentencias o cifras oficiales, una consulta debe ir al registr
 por ejemplo site:registraduria.gov.co o site:cne.gov.co (resultados electorales, credenciales, cargos de elección),
 site:secretariasenado.gov.co (leyes), site:corteconstitucional.gov.co (sentencias), site:dane.gov.co (estadísticas).
 Ese registro es un documento que se contrasta como cualquier otro: lo oficial no es cierto por ser oficial.
+Si la afirmación trata de lo que hizo, decidió o dijo un gobierno o una entidad (una orden, un nombramiento, una
+destitución, un anuncio), una consulta debe ir a su fuente primaria con site: (site:presidencia.gov.co, el ministerio o la
+entidad que corresponda): el comunicado o el acto administrativo pesa más que los medios que lo repiten.
 'when' es el momento al que se refiere la afirmación (cuándo habría ocurrido o cuándo sería cierta) solo si la
 afirmación misma lo dice ("en septiembre de 2026", "el 27 de septiembre"); si habla del presente sin fecha, déjalo vacío. Si la afirmación incluye una cifra, pide los datos:
 'wb_indicators' con códigos de esta lista del Banco Mundial {wb} y 'countries' en ISO3, y/o 'datos_query' con
 palabras para buscar el conjunto de datos abiertos colombiano (por ejemplo "homicidios Policía", "IPC DANE").
+Respeta el nivel de certeza con que se dice algo. Si la frase ya lo presenta como posible, presunto o atribuido ("por
+posibles irregularidades", "presunto fraude", "según la Fiscalía"), lo que se verifica es eso: que se invocó ese motivo o
+que esa entidad lo dice, no que la acusación esté probada. Escribe la afirmación con ese mismo atenuante. Si una
+afirmación acusa a alguien con nombre propio, una de sus consultas busca su versión ("X responde", "X se defiende").
 Cuando el contenido reporta lo que dijo alguien ("X afirmó que…", "X le dijo a Y que…"), lo que se verifica es el fondo:
 ¿es cierto lo que dijo? Que lo haya dicho solo es una afirmación aparte si está en duda (cita inventada o sacada de
 contexto) y nunca es la central. Una valoración tajante sobre hechos públicos ("casi perdimos la democracia", "el país
@@ -220,6 +227,9 @@ deja 'claims' vacío."""
 EVIDENCE_TASK = """Tarea: lee la fuente y, para CADA afirmación numerada, di qué dice la fuente sobre ella. Devuelve un
 item por afirmación con 'claim' = su número entre corchetes.
 - stance: "confirma", "contradice", "contexto" (aporta información sin confirmar ni contradecir) o "no_relacionada".
+  "contexto" solo si la fuente trata de las mismas personas, entidades y hechos de la afirmación. Otra entidad con un
+  nombre parecido (Bomberos de Bogotá frente a la Dirección Nacional de Bomberos), otra persona u otro caso es
+  "no_relacionada", aunque el tema se parezca.
 - basis: en qué se apoya la fuente. "documento" o "dato_oficial" solo si la fuente ES el registro (el resultado
   certificado, la ley publicada, la sentencia, la tabla de datos); lo que una entidad dice o comunica es
   "declaracion_oficial", una versión más que se contrasta como cualquier otra.
@@ -243,6 +253,12 @@ saca algo de contexto), falso, sin_pruebas (no hay evidencia suficiente en ning�
 Usa solo la evidencia entregada. Si una afirmación no tiene evidencia, es sin_pruebas. Una valoración tajante sobre
 hechos públicos se califica por los hechos que supone: si las fuentes no los sostienen, es enganoso o falso.
 Si las fuentes se contradicen entre sí, di cuáles y por qué (por ejemplo, si una nota es anterior a los hechos).
+Califica cada afirmación al nivel de certeza con que está dicha: "lo destituyó por posibles irregularidades" es
+verdadero si ese fue el motivo invocado, aunque las irregularidades no estén probadas; eso se aclara en la explicación,
+no baja la calificación. Si todas las fuentes que confirman repiten un mismo comunicado, trino o declaración, dilo y
+nombra esa fuente primaria: muchos medios que repiten a uno son una sola fuente. Si una afirmación acusa a alguien y
+ninguna fuente trae su versión, dilo ("No encontramos la versión de X"). Lo provisional lleva fecha y hora: nunca
+"hasta ahora", sino "hasta el 3 de octubre a las 15:20".
 'explanation' dice qué encontramos en 1 o 2 frases concretas, con fechas y quién lo dice; no repitas la afirmación.
 'index' es el número de la afirmación.
 'headline' resume el veredicto en una frase y responde primero sobre la afirmación central ("central": true). Si
@@ -262,7 +278,8 @@ def _system(model_cls, nonce: str) -> str:
     schema = json.dumps(model_cls.model_json_schema(), ensure_ascii=False)
     # Every call gets today's date: without it the model takes its training year as "now", calls a
     # five-day-old article "dated in the future" and refuses to check it.
-    return RESEARCHER.format(nonce=nonce, schema=schema) + TODAY.format(today=db.today_co().date().isoformat())
+    now = db.today_co()
+    return RESEARCHER.format(nonce=nonce, schema=schema) + TODAY.format(today=now.date().isoformat(), hour=now.strftime("%H:%M"))
 
 
 def _parse(content: str, model_cls):

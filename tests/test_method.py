@@ -141,7 +141,7 @@ def test_every_model_call_knows_todays_date(web, fake_llm):
                  evidence=lambda u: ("confirma", "Capturaron en Colombia a familiares de alias Fito"), verdict="verdadero")
     asyncio.run(pipeline.investigate({"kind": "text", "text": "Capturaron a familiares de Fito"}, quiet, dedup=False))
     today = db.today_co().date().isoformat()
-    assert len(f.calls) >= 3 and all(f"Fecha de hoy en Colombia: {today}" in c[0]["content"] for c in f.calls)
+    assert len(f.calls) >= 3 and all(f"Fecha de hoy en Colombia: {today}, " in c[0]["content"] for c in f.calls)
 
 
 def test_timeline_events_need_a_source():
