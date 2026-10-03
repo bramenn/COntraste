@@ -27,12 +27,12 @@ def fresh(user):
 def test_editor_sets_the_free_checks_and_raising_tops_everyone_up():
     with TestClient(app) as c:
         user = sign_in(c, extra=0)
-    assert credits.balances(fresh(user))["free"] == 5              # default for new accounts
-    db.set_setting("free_monthly_credits", 8)
-    assert credits.balances(fresh(user))["free"] == 8              # raised mid-month: gets the difference
+    assert credits.balances(fresh(user))["free"] == 30             # default for new accounts
+    db.set_setting("free_monthly_credits", 32)
+    assert credits.balances(fresh(user))["free"] == 32             # raised mid-month: gets the difference
     db.set_setting("free_monthly_credits", 2)
-    assert credits.balances(fresh(user))["free"] == 8              # lowered: nothing taken back this month
-    assert credits.balances(fresh(user))["free"] == 8              # and no double grant
+    assert credits.balances(fresh(user))["free"] == 32             # lowered: nothing taken back this month
+    assert credits.balances(fresh(user))["free"] == 32             # and no double grant
 
 
 def test_daily_limit_counts_only_checks_really_spent(monkeypatch):
@@ -56,6 +56,7 @@ def test_out_of_free_checks_leads_to_the_survey_which_rewards_once(monkeypatch):
         raise main.UserError("fin de la prueba")
     monkeypatch.setattr(main, "investigate", quick)
     db.set_setting("free_monthly_credits", 1)
+    db.set_setting("daily_checks", 10)  # this test is about the monthly checks running out, not the daily ones
     with TestClient(app) as c:
         user = sign_in(c, extra=0)
         credits.spend(fresh(user), "use-" + user["id"])
@@ -99,9 +100,9 @@ def test_people_see_how_many_checks_they_have_left(monkeypatch):
         raise main.UserError("fin de la prueba")
     monkeypatch.setattr(main, "investigate", quick)
     with TestClient(app) as c:
-        assert "Con una cuenta gratis tienes 5 verificaciones al mes" in c.get("/").text
+        assert "Con una cuenta gratis tienes 30 verificaciones al mes, hasta 3 por día" in c.get("/").text
         sign_in(c, extra=0)
         home = c.get("/").text
-        assert "Te quedan <b data-balance>5</b>" in home and "data-balance-pill" in home
+        assert "Te quedan <b data-balance>30</b>" in home and "data-balance-pill" in home
         r = c.post("/api/checks", data={"text": "Afirmación nueva para ver cuántas verificaciones quedan"})
-        assert r.json()["remaining"] == 4
+        assert r.json()["remaining"] == 29

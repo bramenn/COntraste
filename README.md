@@ -36,8 +36,8 @@ Opcionales:
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `MAIL_FROM` | Correo para el enlace de entrada. Sin `SMTP_HOST` el enlace se escribe en el log (solo para desarrollo). |
 | `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET` | Entrar con Google (opcional). URI de redirección: `{PUBLIC_BASE_URL}/auth/google/callback`. |
 | `TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY` | Cloudflare Turnstile al registrarse y al pedir verificaciones. Vacío = sin captcha (solo desarrollo). |
-| `FREE_MONTHLY_CREDITS` | Valor inicial de verificaciones por cuenta al mes (defecto 5). Después se cambia desde `/admin/negocio`. |
-| `DAILY_CHECKS` | Valor inicial del máximo de verificaciones por cuenta al día (defecto 5). Después se cambia desde `/admin/negocio`. |
+| `FREE_MONTHLY_CREDITS` | Valor inicial de verificaciones por cuenta al mes (defecto 30). Después se cambia desde `/admin/negocio`. |
+| `DAILY_CHECKS` | Valor inicial del máximo de verificaciones por cuenta al día (defecto 3). Después se cambia desde `/admin/negocio`. |
 | `DAILY_SPEND_LIMIT_USD` | Gasto diario máximo en modelos (defecto 5). Al 80 % avisa en `/admin`; al 100 % pausa las verificaciones nuevas hasta el día siguiente (el archivo sigue abierto). |
 
 Ninguna clave llega al navegador: todas se usan solo en el servidor.

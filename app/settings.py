@@ -55,9 +55,9 @@ TURNSTILE_SECRET_KEY = env("TURNSTILE_SECRET_KEY")
 TURNSTILE_HOSTNAMES = [h for h in (x.strip() for x in env("TURNSTILE_HOSTNAMES").split(",")) if h] or [
     (urlsplit(PUBLIC_BASE_URL).hostname or "")
 ]
-DAILY_CHECKS = int(env("DAILY_CHECKS", "5"))  # per account per day; editors change it in /admin
+DAILY_CHECKS = int(env("DAILY_CHECKS", "3"))  # per account per day; editors change it in /admin
 AUTO_CHECKS_PER_DAY = int(env("AUTO_CHECKS_PER_DAY", "5"))  # checks COntraste picks from the day's news; 0 = off
-FREE_MONTHLY_CREDITS = int(env("FREE_MONTHLY_CREDITS", "5"))  # starting value; editors change it in /admin
+FREE_MONTHLY_CREDITS = int(env("FREE_MONTHLY_CREDITS", "30"))  # starting value; editors change it in /admin
 # Entry gate (app/gate.py): fast classifier for relevance to Colombia and prompt injection, before research.
 GATE = env("GATE", "true").lower() in ("1", "true", "yes")
 # Model for the gate on OpenRouter's Decisions API (Jev). Empty: the fast chat model does it.
