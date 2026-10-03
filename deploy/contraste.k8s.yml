@@ -47,6 +47,13 @@ spec:
     metadata:
       labels: {app: contraste, component: pgbouncer}
     spec:
+      # mumen-rider leaves the cluster: nothing of Contraste is ever scheduled there.
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - {key: kubernetes.io/hostname, operator: NotIn, values: [mumen-rider]}
       containers:
       - name: pgbouncer
         image: edoburu/pgbouncer:v1.25.2-p0
@@ -95,6 +102,13 @@ spec:
     metadata:
       labels: {app: contraste, component: app}
     spec:
+      # mumen-rider leaves the cluster: nothing of Contraste is ever scheduled there.
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - {key: kubernetes.io/hostname, operator: NotIn, values: [mumen-rider]}
       imagePullSecrets: [{name: ghcr-pull}]
       # Running checks get time to finish on shutdown; anything left is re-queued by another replica.
       terminationGracePeriodSeconds: 180

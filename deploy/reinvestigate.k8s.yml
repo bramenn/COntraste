@@ -16,6 +16,13 @@ spec:
       labels: {app: contraste, component: reinvestigate}
     spec:
       restartPolicy: Never
+      # mumen-rider leaves the cluster: nothing of Contraste is ever scheduled there.
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - {key: kubernetes.io/hostname, operator: NotIn, values: [mumen-rider]}
       imagePullSecrets: [{name: ghcr-pull}]
       containers:
       - name: reinvestigate

@@ -2,13 +2,14 @@
 # France: ~121 ms per query, 1-3 s per page). The app still connects through pgbouncer.
 # Secret postgres-admin (POSTGRES_PASSWORD for the "postgres" superuser) is created out of band. The app
 # role contraste_app is not a superuser and owns the "contraste" database.
-# local-path ties the volume to one node: if that node is lost, restore from the Velero backup below.
+# local-path ties the volume to one node: if that node is lost, restore from the Velero backup below. The data
+# moved off mumen-rider (leaving the cluster) to a new volume, postgres-pgdata, on 2026-10-03.
 # Backups: Velero copies the volume to S3 every 6 h, and right before each copy a hook writes a
 # consistent pg_dump into the same volume (dump/contraste.dump), which is the file to restore from.
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: postgres-data
+  name: postgres-pgdata
   namespace: contraste
 spec:
   accessModes: [ReadWriteOnce]
@@ -35,6 +36,13 @@ spec:
         pre.hook.backup.velero.io/command: '["/bin/sh", "-c", "mkdir -p /var/lib/postgresql/dump && pg_dump -U postgres -d contraste -Fc -f /var/lib/postgresql/dump/contraste.dump.tmp && mv /var/lib/postgresql/dump/contraste.dump.tmp /var/lib/postgresql/dump/contraste.dump"]'
         pre.hook.backup.velero.io/timeout: 3m
     spec:
+      # mumen-rider leaves the cluster: nothing of Contraste is ever scheduled there.
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - {key: kubernetes.io/hostname, operator: NotIn, values: [mumen-rider]}
       containers:
       - name: postgres
         image: postgres:18-alpine
@@ -57,7 +65,7 @@ spec:
         - {name: data, mountPath: /var/lib/postgresql}
       volumes:
       - name: data
-        persistentVolumeClaim: {claimName: postgres-data}
+        persistentVolumeClaim: {claimName: postgres-pgdata}
 ---
 apiVersion: v1
 kind: Service
