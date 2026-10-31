@@ -95,7 +95,7 @@ spec:
   # The HPA owns the replica count; rollouts keep at least the current capacity.
   strategy:
     type: RollingUpdate
-    rollingUpdate: {maxUnavailable: 0, maxSurge: 2}
+    rollingUpdate: {maxUnavailable: 1, maxSurge: 0}  # el clúster va justo de memoria: sin pods de más al desplegar
   selector:
     matchLabels: {app: contraste, component: app}
   template:
@@ -132,7 +132,7 @@ spec:
           failureThreshold: 4
         resources:
           requests: {cpu: 250m, memory: 1500Mi}
-          limits: {cpu: 2, memory: 4Gi}
+          limits: {cpu: 2, memory: 2Gi}  # con 4Gi dos pods llenaban saitama (8 GB) y tumbaban el clúster
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
